@@ -27,7 +27,7 @@ namespace MonkeyLoader.DoublePrecision
         public static Vector3 CameraPosition = Vector3.zero;
     };
 
-    [HarmonyPatchCategory(nameof(DoublePrecision))]
+    [HarmonyPatchCategory(nameof(Slot_Patches))]
     [HarmonyPatch(typeof(SlotConnector), nameof(SlotConnector.UpdateData))]
     internal class Slot_Patches : ResoniteMonkey<Slot_Patches>
     {
@@ -41,12 +41,12 @@ namespace MonkeyLoader.DoublePrecision
 
         private static void Postfix(SlotConnector __instance) 
         {
-            Logger.Info(() => "Slot");
-            //__instance._transform.position += DataShare.CameraPosition;
-            //DataShare.CameraPosition = Vector3.zero;
+            //Logger.Info(() => "Slot");
+            __instance._transform.position += DataShare.CameraPosition;
+            DataShare.CameraPosition = Vector3.zero;
         }
     }
-    [HarmonyPatchCategory(nameof(DoublePrecision))]
+    [HarmonyPatchCategory(nameof(Camera_Patches))]
     [HarmonyPatch(typeof(HeadOutput), nameof(HeadOutput.UpdateOverridenView))]
     internal class Camera_Patches : ResoniteMonkey<Camera_Patches>
     {
@@ -60,7 +60,7 @@ namespace MonkeyLoader.DoublePrecision
         {
             DataShare.CameraPosition = __instance.transform.position;
             __instance.transform.position = Vector3.zero;
-            Logger.Info(() => "test");
+            //Logger.Info(() => "test");
         }
     }
 

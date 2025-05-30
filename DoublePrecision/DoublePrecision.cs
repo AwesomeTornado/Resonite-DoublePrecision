@@ -33,9 +33,7 @@ namespace MonkeyLoader.DoublePrecision
     {
         protected override IEnumerable<IFeaturePatch> GetFeaturePatches() => Enumerable.Empty<IFeaturePatch>();
 
-        protected DataShare data;
-
-        private static void Postfix(SlotConnector __instance) 
+        private static void Postfix(SlotConnector __instance)
         {
             //Logger.Info(() => "Slot");
             __instance._transform.position += DataShare.CameraPosition;
@@ -50,25 +48,13 @@ namespace MonkeyLoader.DoublePrecision
 
         private static void Postfix(HeadOutput __instance)
         {
-            //Logger.Info(() => "test");
-            switch (__instance.Type)
+            DataShare.CameraPosition = __instance.transform.position;
+            __instance.transform.position = Vector3.zero;
+            if (__instance.Type == HeadOutput.HeadOutputType.VR)
             {
-                case HeadOutput.HeadOutputType.VR:
-                    {
-                        DataShare.CameraPosition = __instance.CameraRoot.position + __instance.transform.position;
-                        __instance.transform.position = Vector3.zero;
-                        __instance.CameraRoot.position = Vector3.zero;
-                        break;
-                    }
-                case HeadOutput.HeadOutputType.Screen:
-                    {
-                        DataShare.CameraPosition = __instance.transform.position;
-                        __instance.transform.position = Vector3.zero;
-                        return;
-                    }
+                DataShare.CameraPosition += __instance.CameraRoot.position;
+                __instance.CameraRoot.position = Vector3.zero;
             }
         }
     }
-
-
 }

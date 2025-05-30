@@ -1,15 +1,8 @@
-﻿using Elements.Core;
-using FrooxEngine;
-using FrooxEngine.ProtoFlux;
-using HarmonyLib;
+﻿using HarmonyLib;
 using MonkeyLoader.Patching;
 using MonkeyLoader.Resonite;
-using MonkeyLoader.Resonite.Features.FrooxEngine;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 using UnityFrooxEngineRunner;
 
@@ -18,9 +11,7 @@ namespace MonkeyLoader.DoublePrecision
 
     public class AssemblyInfo
     {
-        //setup instructions (in no particular order):
-        //Replace ExampleURL with your source repo url
-        internal const string VERSION_CONSTANT = "1.0.0"; //Changing the version here updates it in all locations needed
+        internal const string VERSION_CONSTANT = "1.0.1"; //Changing the version here updates it in all locations needed
     }
     public class DataShare
     {

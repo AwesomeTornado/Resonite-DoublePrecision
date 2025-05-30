@@ -8,11 +8,11 @@
   <PropertyGroup>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageId>MonkeyLoader.DoublePrecision.Resonite</PackageId>
-    <Title>MonkeyLoader Resonite Mod Template</Title>
+    <Title>DoublePrecision</Title>
     <Authors>__Choco__</Authors>
     <Description>A mod which fixes floating point errors.</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>ExampleURL</PackageProjectUrl>
+    <PackageProjectUrl>https://github.com/AwesomeTornado/Resonite-DoublePrecision</PackageProjectUrl>
     <PackageTags>mod; mods; monkeyloader; resonite</PackageTags>
     <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);AddExtraFilesToPackage</TargetsForTfmSpecificContentInPackage>
   </PropertyGroup>

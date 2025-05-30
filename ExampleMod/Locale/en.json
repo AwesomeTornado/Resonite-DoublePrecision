@@ -1,8 +1,0 @@
-{
-  "localeCode": "en",
-  "authors": [ "ExampleAuthor" ],
-  "messages": {
-    "ExampleMod.KeyA": "Localization key A",
-    "ExampleMod.KeyB": "Another localization"
-  }
-}

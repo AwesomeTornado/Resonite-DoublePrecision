@@ -1,0 +1,8 @@
+{
+  "localeCode": "en",
+  "authors": [ "__Choco__" ],
+  "messages": {
+    "DoublePrecision.KeyA": "Localization key A",
+    "DoublePrecision.KeyB": "Another localization"
+  }
+}

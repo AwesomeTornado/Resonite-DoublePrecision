@@ -31,11 +31,7 @@ namespace MonkeyLoader.DoublePrecision
     [HarmonyPatch(typeof(SlotConnector), nameof(SlotConnector.UpdateData))]
     internal class Slot_Patches : ResoniteMonkey<Slot_Patches>
     {
-        // The options for these should be provided by your game's game pack.
-        protected override IEnumerable<IFeaturePatch> GetFeaturePatches()
-        {
-            yield return new FeaturePatch<ProtofluxTool>(PatchCompatibility.HookOnly);
-        }
+        protected override IEnumerable<IFeaturePatch> GetFeaturePatches() => Enumerable.Empty<IFeaturePatch>();
 
         protected DataShare data;
 
@@ -50,17 +46,27 @@ namespace MonkeyLoader.DoublePrecision
     [HarmonyPatch(typeof(HeadOutput), nameof(HeadOutput.UpdateOverridenView))]
     internal class Camera_Patches : ResoniteMonkey<Camera_Patches>
     {
-        // The options for these should be provided by your game's game pack.
-        protected override IEnumerable<IFeaturePatch> GetFeaturePatches()
-        {
-            yield return new FeaturePatch<ProtofluxTool>(PatchCompatibility.HookOnly);
-        }
+        protected override IEnumerable<IFeaturePatch> GetFeaturePatches() => Enumerable.Empty<IFeaturePatch>();
 
         private static void Postfix(HeadOutput __instance)
         {
-            DataShare.CameraPosition = __instance.transform.position;
-            __instance.transform.position = Vector3.zero;
             //Logger.Info(() => "test");
+            switch (__instance.Type)
+            {
+                case HeadOutput.HeadOutputType.VR:
+                    {
+                        DataShare.CameraPosition = __instance.CameraRoot.position + __instance.transform.position;
+                        __instance.transform.position = Vector3.zero;
+                        __instance.CameraRoot.position = Vector3.zero;
+                        break;
+                    }
+                case HeadOutput.HeadOutputType.Screen:
+                    {
+                        DataShare.CameraPosition = __instance.transform.position;
+                        __instance.transform.position = Vector3.zero;
+                        return;
+                    }
+            }
         }
     }
 

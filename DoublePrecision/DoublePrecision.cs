@@ -44,15 +44,16 @@ namespace MonkeyLoader.DoublePrecision
             {
                 case HeadOutput.HeadOutputType.VR:
                     {
-                        DataShare.CameraPosition = __instance.transform.position + __instance.CameraRoot.position;
-                        //__instance.transform.position = Vector3.zero;
-                        //__instance.CameraRoot.position = Vector3.zero;
+                        DataShare.CameraPosition = __instance.transform.position;
+                        __instance.CameraRoot.position += __instance.transform.position;
+                        __instance.transform.position = Vector3.zero;
+                        
                         break;
                     }
                 case HeadOutput.HeadOutputType.Screen:
                     {
                         DataShare.CameraPosition = __instance.transform.position;
-                        //__instance.transform.position = Vector3.zero;
+                        __instance.transform.position = Vector3.zero;
                         return;
                     }
             }

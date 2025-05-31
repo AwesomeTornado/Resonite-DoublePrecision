@@ -39,13 +39,24 @@ namespace MonkeyLoader.DoublePrecision
 
         private static void Postfix(HeadOutput __instance)
         {
-            DataShare.CameraPosition = __instance.transform.position;
-            __instance.transform.position = Vector3.zero;
-            if (__instance.Type == HeadOutput.HeadOutputType.VR)
+
+            switch (__instance.Type)
             {
-                DataShare.CameraPosition += __instance.CameraRoot.position;
-                __instance.CameraRoot.position = Vector3.zero;
+                case HeadOutput.HeadOutputType.VR:
+                    {
+                        DataShare.CameraPosition = __instance.transform.position + __instance.CameraRoot.position;
+                        //__instance.transform.position = Vector3.zero;
+                        //__instance.CameraRoot.position = Vector3.zero;
+                        break;
+                    }
+                case HeadOutput.HeadOutputType.Screen:
+                    {
+                        DataShare.CameraPosition = __instance.transform.position;
+                        //__instance.transform.position = Vector3.zero;
+                        return;
+                    }
             }
         }
     }
+
 }

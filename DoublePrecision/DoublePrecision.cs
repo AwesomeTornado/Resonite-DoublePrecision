@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿using Elements.Core;
+using HarmonyLib;
 using MonkeyLoader.Patching;
 using MonkeyLoader.Resonite;
 using System.Collections.Generic;
@@ -15,7 +16,9 @@ namespace MonkeyLoader.DoublePrecision
     }
     public class DataShare
     {
-        public static Vector3 CameraPosition = Vector3.zero;
+        public static Vector3 RootSlotOffset = Vector3.zero;
+        public static Vector3 GlobalOffset = Vector3.zero;
+        public static float3 ViewPos = float3.Zero;
     };
 
     [HarmonyPatchCategory(nameof(Slot_Patches))]
@@ -27,24 +30,27 @@ namespace MonkeyLoader.DoublePrecision
         private static void Postfix(SlotConnector __instance)
         {
             //Logger.Info(() => "Slot");
-            __instance._transform.position += DataShare.CameraPosition;
-            DataShare.CameraPosition = Vector3.zero;
+            //__instance._transform.position = DataShare.RootSlotOffset;
+            //DataShare.RootSlotOffset = Vector3.zero;
         }
     }
     [HarmonyPatchCategory(nameof(Camera_Patches))]
-    [HarmonyPatch(typeof(HeadOutput), nameof(HeadOutput.UpdateOverridenView))]
+    [HarmonyPatch(typeof(HeadOutput), nameof(HeadOutput.UpdatePositioning))]
     internal class Camera_Patches : ResoniteMonkey<Camera_Patches>
     {
         protected override IEnumerable<IFeaturePatch> GetFeaturePatches() => Enumerable.Empty<IFeaturePatch>();
 
         private static void Postfix(HeadOutput __instance)
         {
+            DataShare.RootSlotOffset = new Vector3(0, 00, 10);
+            __instance.transform.position = DataShare.RootSlotOffset;
+            return;
 
             switch (__instance.Type)
             {
                 case HeadOutput.HeadOutputType.VR:
                     {
-                        DataShare.CameraPosition = __instance.transform.position;
+                        DataShare.RootSlotOffset = DataShare.GlobalOffset - __instance.transform.position;
                         __instance.CameraRoot.position += __instance.transform.position;
                         __instance.transform.position = Vector3.zero;
                         
@@ -52,8 +58,13 @@ namespace MonkeyLoader.DoublePrecision
                     }
                 case HeadOutput.HeadOutputType.Screen:
                     {
-                        DataShare.CameraPosition = __instance.transform.position;
-                        __instance.transform.position = Vector3.zero;
+                        /* DataShare.RootSlotOffset = DataShare.GlobalOffset - __instance.transform.position;
+                         __instance.transform.position = Vector3.zero;*/
+                        //__instance._viewPos = DataShare.ViewPos;
+                        //DataShare.ViewPos = new float3(0, 1f, 0);
+                        DataShare.RootSlotOffset = new Vector3(0, 00010000, 0);
+                        __instance.transform.position = DataShare.RootSlotOffset;
+                        //__instance.CameraRoot.position = DataShare.RootSlotOffset;
                         return;
                     }
             }
@@ -61,3 +72,16 @@ namespace MonkeyLoader.DoublePrecision
     }
 
 }
+
+/*
+ * IMPORTANT THINGS THAT I HAVE LEARNED!!!!
+ * 
+ * __Instance.CameraRoot does NOT cause floating point errors, no matter how far out it is. (In the DASH)
+ * __Instance.ViewPos does NOT cause floating point errors, no matter how far out it is. (In the DASH)
+ * 
+ * __Instance.transform.position DOES cause floating point errors! (In the DASH)
+ * __Instance.transform.position is VERY IMPORTANT for VR Camera positioning.
+ *  It seems to controll the player root position? playspace motion still works, but controller motion does not.
+ * 
+ * 
+ */

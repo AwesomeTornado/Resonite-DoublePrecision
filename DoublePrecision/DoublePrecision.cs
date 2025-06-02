@@ -43,12 +43,18 @@ namespace MonkeyLoader.DoublePrecision
 
         private static void Postfix(HeadOutput __instance)
         {
-            DataShare.GlobalOffset -= new Vector3(0, 1f, 0);
+            DataShare.GlobalOffset += new Vector3(0, 10f, 0);
             DataShare.RootSlotOffset = DataShare.GlobalOffset;
-            //__instance._viewPos += __instance.transform.position.ToEngine();
+            float x = __instance.transform.position.x;
+            float y = __instance.transform.position.y;
+            float z = __instance.transform.position.z;
+            float3 xyz = new float3(x,y,z);
+            //DataShare.RootSlotOffset = __instance.transform.position;
+            __instance._viewPos += xyz;
             //__instance.transform.position = DataShare.RootSlotOffset;
+            //__instance.transform.position = Vector3.zero;
             
-
+            
             //__instance._viewPos = DataShare.RootSlotOffset.ToEngine();
             return;
 
@@ -89,11 +95,11 @@ namespace MonkeyLoader.DoublePrecision
             float y = DataShare.RootSlotOffset.y;
             float z = DataShare.RootSlotOffset.z;
             float3 xyz = new float3 (x, y, z);
-            __instance.InputInterface.CustomTrackingOffset += xyz;
-            DataShare.RootSlotOffset = Vector3.zero;
+            //float3 xyz = new float3 (1, 0, 0);
+            __instance.InputInterface.CustomTrackingOffset = xyz;
+            //DataShare.RootSlotOffset = Vector3.zero;
         }
     }
-
 }
 
 /*
@@ -106,8 +112,8 @@ namespace MonkeyLoader.DoublePrecision
  * __Instance.transform.position is VERY IMPORTANT for VR Camera positioning.
  *  It seems to controll the player root position? playspace motion still works, but controller motion does not.
  *  
- *  ViewPos -= Transform.position makes screen camera stay still, while avatar moves
- *  ViewPos += Transform.position makes avatar stay still, while player camera moves
+ *  ViewPos -= Transform.position makes screen camera stay still, while avatar moves (Only in screen mode?)
+ *  ViewPos += Transform.position makes avatar stay still, while player camera moves (Only in screen mode?)
  * 
  * 
  */

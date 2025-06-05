@@ -12,7 +12,6 @@ using UnityEngine.Assertions;
 
 namespace MonkeyLoader.DoublePrecision
 {
-
     public class AssemblyInfo
     {
         internal const string VERSION_CONSTANT = "1.1.0"; //Changing the version here updates it in all locations needed
@@ -20,30 +19,11 @@ namespace MonkeyLoader.DoublePrecision
 
     public class DataShare
     {
-        public static List<WorldConnector> worldConnectors = new List<WorldConnector>();
         public static List<World> frooxWorlds = new List<World>();
         public static List<GameObject> unityWorldRoots = new List<GameObject>();
         public static Vector3 FrooxEngineCameraPosition = Vector3.zero;
-        public static Vector3 UnityEngineWorldRootOffset = Vector3.zero;
         public static bool IsUserspaceInitialized = false;
     }
-
-
-    [HarmonyPatchCategory(nameof(Slot_Patches))]
-    [HarmonyPatch(typeof(SlotConnector), nameof(SlotConnector.UpdateData))]
-    internal class Slot_Patches : ResoniteMonkey<Slot_Patches>
-    {
-        protected override IEnumerable<IFeaturePatch> GetFeaturePatches() => Enumerable.Empty<IFeaturePatch>();
-        private static void Postfix(SlotConnector __instance)
-        {
-            foreach (WorldConnector worldConnector in DataShare.worldConnectors)
-            {
-                worldConnector.WorldRoot.transform.position -= DataShare.UnityEngineWorldRootOffset;
-            }
-            DataShare.UnityEngineWorldRootOffset = Vector3.zero;
-        }
-    }
-
 
     [HarmonyPatchCategory(nameof(WorldInitIntercept))]
     [HarmonyPatch(typeof(World), MethodType.Constructor, new Type[] { typeof(WorldManager), typeof(bool), typeof(bool) })]
@@ -65,7 +45,6 @@ namespace MonkeyLoader.DoublePrecision
                 {
                     Logger.Error(() => "Unable to cast IWorldConnector to WorldConnector.");
                 }
-
             }
             else
             {
@@ -87,13 +66,12 @@ namespace MonkeyLoader.DoublePrecision
 
         private static void Postfix(HeadOutput __instance)
         {
-
+            Vector3 playerMotion = Vector3.zero;
             switch (__instance.Type)
             {
                 case HeadOutput.HeadOutputType.VR:
                     {
-                        //Logger.Info(() => "begin debug step");
-                        DataShare.UnityEngineWorldRootOffset = __instance.transform.position - DataShare.FrooxEngineCameraPosition;
+                        playerMotion = __instance.transform.position - DataShare.FrooxEngineCameraPosition;
                         DataShare.FrooxEngineCameraPosition = __instance.transform.position;
                         __instance.transform.position = Vector3.zero;
                         break;
@@ -113,10 +91,9 @@ namespace MonkeyLoader.DoublePrecision
                     DataShare.unityWorldRoots.RemoveAt(i);
                 } else if (DataShare.frooxWorlds[i].Focus == World.WorldFocus.Focused)
                 {
-                    DataShare.unityWorldRoots[i].transform.position -= DataShare.UnityEngineWorldRootOffset;
+                    DataShare.unityWorldRoots[i].transform.position -= playerMotion;
                 }
             }
-            DataShare.UnityEngineWorldRootOffset = Vector3.zero;
         }
     }
 }

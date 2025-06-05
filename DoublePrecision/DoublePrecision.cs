@@ -21,8 +21,8 @@ namespace MonkeyLoader.DoublePrecision
     {
         public static List<World> frooxWorlds = new List<World>();
         public static List<GameObject> unityWorldRoots = new List<GameObject>();
-        public static Vector3 FrooxEngineCameraPosition = Vector3.zero;
-        public static bool IsUserspaceInitialized = false;
+        //public static Vector3 FrooxEngineCameraPosition = Vector3.zero; //this may need to be added back in as a list if there are offset problems when switching worlds while moving.
+        public static List<Vector3> cachedWorldOffsets = new List<Vector3>();
     }
 
     [HarmonyPatchCategory(nameof(WorldInitIntercept))]
@@ -30,16 +30,19 @@ namespace MonkeyLoader.DoublePrecision
     internal class WorldInitIntercept : ResoniteMonkey<WorldInitIntercept>
     {
         protected override IEnumerable<IFeaturePatch> GetFeaturePatches() => Enumerable.Empty<IFeaturePatch>();
+
+        private static bool IsUserspaceInitialized = false;
         private static void Postfix(World __instance)
         {
             Logger.Info(() => "Intercepted World Init, attempting to cache World reference.");
-            if (DataShare.IsUserspaceInitialized)
+            if (IsUserspaceInitialized)
             {
-                DataShare.frooxWorlds.Add(__instance);
                 WorldConnector? worldConnector = __instance.Connector as WorldConnector;
                 if (worldConnector is not null)
                 {
+                    DataShare.frooxWorlds.Add(__instance);
                     DataShare.unityWorldRoots.Add(worldConnector.WorldRoot);
+                    //possibly add in FrooxEngineCameraPosition list init here if needed.
                 }
                 else
                 {
@@ -49,11 +52,10 @@ namespace MonkeyLoader.DoublePrecision
             else
             {
                 Logger.Info(() => "First init, assuming this world is Userspace, and skipping.");
-                DataShare.IsUserspaceInitialized = true;
+                IsUserspaceInitialized = true;
             }
 
             Logger.Info(() => "Done! There are a total of " + DataShare.frooxWorlds.Count + " world connectors in the list.");
-            Debug.Assert(DataShare.frooxWorlds.Count == DataShare.unityWorldRoots.Count); //It's bad if these two get out of sync.
         }
     }
 
@@ -64,6 +66,8 @@ namespace MonkeyLoader.DoublePrecision
     {
         protected override IEnumerable<IFeaturePatch> GetFeaturePatches() => Enumerable.Empty<IFeaturePatch>();
 
+        private static Vector3 FrooxEngineCameraPosition = Vector3.zero;
+
         private static void Postfix(HeadOutput __instance)
         {
             Vector3 playerMotion = Vector3.zero;
@@ -71,8 +75,8 @@ namespace MonkeyLoader.DoublePrecision
             {
                 case HeadOutput.HeadOutputType.VR:
                     {
-                        playerMotion = __instance.transform.position - DataShare.FrooxEngineCameraPosition;
-                        DataShare.FrooxEngineCameraPosition = __instance.transform.position;
+                        playerMotion = __instance.transform.position - FrooxEngineCameraPosition;
+                        FrooxEngineCameraPosition = __instance.transform.position;
                         __instance.transform.position = Vector3.zero;
                         break;
                     }
@@ -92,6 +96,7 @@ namespace MonkeyLoader.DoublePrecision
                 } else if (DataShare.frooxWorlds[i].Focus == World.WorldFocus.Focused)
                 {
                     DataShare.unityWorldRoots[i].transform.position -= playerMotion;
+                    DataShare.cachedWorldOffsets[i] += playerMotion;
                 }
             }
         }

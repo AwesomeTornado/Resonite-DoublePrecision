@@ -13,7 +13,7 @@ namespace MonkeyLoader.DoublePrecision
 
     public class AssemblyInfo
     {
-        internal const string VERSION_CONSTANT = "1.0.1"; //Changing the version here updates it in all locations needed
+        internal const string VERSION_CONSTANT = "1.1.0"; //Changing the version here updates it in all locations needed
     }
 
     public class DataShare

@@ -22,7 +22,6 @@ namespace MonkeyLoader.DoublePrecision
         public static List<World> frooxWorlds = new List<World>();
         public static List<GameObject> unityWorldRoots = new List<GameObject>();
         //public static Vector3 FrooxEngineCameraPosition = Vector3.zero; //this may need to be added back in as a list if there are offset problems when switching worlds while moving.
-        public static List<Vector3> cachedWorldOffsets = new List<Vector3>();
     }
 
     [HarmonyPatchCategory(nameof(WorldInitIntercept))]
@@ -68,37 +67,55 @@ namespace MonkeyLoader.DoublePrecision
 
         private static Vector3 FrooxEngineCameraPosition = Vector3.zero;
 
+        private static HeadOutput.HeadOutputType? prevOutputMode = null;
+
         private static void Postfix(HeadOutput __instance)
         {
-            Vector3 playerMotion = Vector3.zero;
-            switch (__instance.Type)
-            {
-                case HeadOutput.HeadOutputType.VR:
-                    {
-                        playerMotion = __instance.transform.position - FrooxEngineCameraPosition;
-                        FrooxEngineCameraPosition = __instance.transform.position;
-                        __instance.transform.position = Vector3.zero;
-                        break;
-                    }
-                case HeadOutput.HeadOutputType.Screen:
-                    {
-                        __instance.transform.position = Vector3.zero;
-                        break;
-                    }
-            }
-
-            for(int i = 0; i < DataShare.unityWorldRoots.Count; i++)
+            int index = -1;
+            for (int i = 0; i < DataShare.unityWorldRoots.Count; i++)
             {
                 if (DataShare.frooxWorlds[i] is null || DataShare.frooxWorlds[i].IsDestroyed || DataShare.frooxWorlds[i].IsDisposed)
                 {
                     DataShare.frooxWorlds.RemoveAt(i);
                     DataShare.unityWorldRoots.RemoveAt(i);
-                } else if (DataShare.frooxWorlds[i].Focus == World.WorldFocus.Focused)
+                }
+                else if (DataShare.frooxWorlds[i].Focus == World.WorldFocus.Focused)
                 {
-                    DataShare.unityWorldRoots[i].transform.position -= playerMotion;
-                    DataShare.cachedWorldOffsets[i] += playerMotion;
+                    index = i;
                 }
             }
+            if (index == -1)
+            {
+                Logger.Error(() => "There are no valid focused worlds! Fatal error, exiting function.");
+                return;
+            }
+            if (prevOutputMode is null) {
+                prevOutputMode = __instance.Type;
+            }
+            switch (__instance.Type)
+            {
+                case HeadOutput.HeadOutputType.VR:
+                    {
+                        Vector3 playerMotion = playerMotion = __instance.transform.position - FrooxEngineCameraPosition;
+                        FrooxEngineCameraPosition = __instance.transform.position;
+                        DataShare.unityWorldRoots[index].transform.position -= playerMotion;
+                        if (prevOutputMode != HeadOutput.HeadOutputType.VR)
+                        {
+                            prevOutputMode = HeadOutput.HeadOutputType.VR;
+                        }
+                        break;
+                    }
+                case HeadOutput.HeadOutputType.Screen:
+                    {
+                        if (prevOutputMode != HeadOutput.HeadOutputType.Screen)
+                        {
+                            prevOutputMode = HeadOutput.HeadOutputType.Screen;
+                        }
+                        break;
+                    }
+            }
+            prevOutputMode = __instance.Type;
+            __instance.transform.position = Vector3.zero;
         }
     }
 }

@@ -170,7 +170,8 @@ namespace MonkeyLoader.DoublePrecision
                     }
                 case HeadOutput.HeadOutputType.Screen:
                     {
-                        return;
+                        __instance.transform.position = Vector3.zero;
+                        break;
                     }
             }
         }

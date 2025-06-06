@@ -69,6 +69,8 @@ namespace MonkeyLoader.DoublePrecision
 
         private static HeadOutput.HeadOutputType? prevOutputMode = null;
 
+        private static Vector3 randomOffsetVariabletoRename = Vector3.zero;
+
         private static void Postfix(HeadOutput __instance)
         {
             int index = -1;
@@ -92,25 +94,30 @@ namespace MonkeyLoader.DoublePrecision
             if (prevOutputMode is null) {
                 prevOutputMode = __instance.Type;
             }
+            Vector3 playerMotion = playerMotion = __instance.transform.position - FrooxEngineCameraPosition;
+            FrooxEngineCameraPosition = __instance.transform.position;
             switch (__instance.Type)
             {
                 case HeadOutput.HeadOutputType.VR:
                     {
-                        Vector3 playerMotion = playerMotion = __instance.transform.position - FrooxEngineCameraPosition;
-                        FrooxEngineCameraPosition = __instance.transform.position;
-                        DataShare.unityWorldRoots[index].transform.position -= playerMotion;
                         if (prevOutputMode != HeadOutput.HeadOutputType.VR)
                         {
-                            prevOutputMode = HeadOutput.HeadOutputType.VR;
+                            prevOutputMode = HeadOutput.HeadOutputType.VR;//reset prev output mode
+                            DataShare.unityWorldRoots[index].transform.position = randomOffsetVariabletoRename;
+                            randomOffsetVariabletoRename = Vector3.zero;
                         }
+                        DataShare.unityWorldRoots[index].transform.position -= playerMotion;
                         break;
                     }
                 case HeadOutput.HeadOutputType.Screen:
                     {
                         if (prevOutputMode != HeadOutput.HeadOutputType.Screen)
                         {
-                            prevOutputMode = HeadOutput.HeadOutputType.Screen;
+                            prevOutputMode = HeadOutput.HeadOutputType.Screen;//reset prev output mode
+                            randomOffsetVariabletoRename = DataShare.unityWorldRoots[index].transform.position;
+                            DataShare.unityWorldRoots[index].transform.position = Vector3.zero;
                         }
+                        randomOffsetVariabletoRename -= playerMotion;//move this to record where the world *should* be, instead of moving the world.
                         break;
                     }
             }

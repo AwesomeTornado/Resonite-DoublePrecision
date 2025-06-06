@@ -21,6 +21,7 @@ namespace MonkeyLoader.DoublePrecision
     {
         public static List<World> frooxWorlds = new List<World>();
         public static List<GameObject> unityWorldRoots = new List<GameObject>();
+        public static List<Vector3> worldOffset = new List<Vector3>();
         //public static Vector3 FrooxEngineCameraPosition = Vector3.zero; //this may need to be added back in as a list if there are offset problems when switching worlds while moving.
     }
 
@@ -41,6 +42,7 @@ namespace MonkeyLoader.DoublePrecision
                 {
                     DataShare.frooxWorlds.Add(__instance);
                     DataShare.unityWorldRoots.Add(worldConnector.WorldRoot);
+                    DataShare.worldOffset.Add(Vector3.zero);
                     //possibly add in FrooxEngineCameraPosition list init here if needed.
                 }
                 else
@@ -68,8 +70,6 @@ namespace MonkeyLoader.DoublePrecision
         private static Vector3 FrooxEngineCameraPosition = Vector3.zero;
 
         private static HeadOutput.HeadOutputType? prevOutputMode = null;
-
-        private static Vector3 randomOffsetVariabletoRename = Vector3.zero;
 
         private static void Postfix(HeadOutput __instance)
         {
@@ -103,8 +103,8 @@ namespace MonkeyLoader.DoublePrecision
                         if (prevOutputMode != HeadOutput.HeadOutputType.VR)
                         {
                             prevOutputMode = HeadOutput.HeadOutputType.VR;//reset prev output mode
-                            DataShare.unityWorldRoots[index].transform.position = randomOffsetVariabletoRename;
-                            randomOffsetVariabletoRename = Vector3.zero;
+                            DataShare.unityWorldRoots[index].transform.position = DataShare.worldOffset[index];
+                            DataShare.worldOffset[index] = Vector3.zero;
                         }
                         DataShare.unityWorldRoots[index].transform.position -= playerMotion;
                         break;
@@ -114,10 +114,10 @@ namespace MonkeyLoader.DoublePrecision
                         if (prevOutputMode != HeadOutput.HeadOutputType.Screen)
                         {
                             prevOutputMode = HeadOutput.HeadOutputType.Screen;//reset prev output mode
-                            randomOffsetVariabletoRename = DataShare.unityWorldRoots[index].transform.position;
+                            DataShare.worldOffset[index] = DataShare.unityWorldRoots[index].transform.position;
                             DataShare.unityWorldRoots[index].transform.position = Vector3.zero;
                         }
-                        randomOffsetVariabletoRename -= playerMotion;//move this to record where the world *should* be, instead of moving the world.
+                        DataShare.worldOffset[index] -= playerMotion;//move this to record where the world *should* be, instead of moving the world.
                         break;
                     }
             }

@@ -14,7 +14,7 @@ namespace MonkeyLoader.DoublePrecision
 {
     public class AssemblyInfo
     {
-        internal const string VERSION_CONSTANT = "1.3.0"; //Changing the version here updates it in all locations needed
+        internal const string VERSION_CONSTANT = "1.4.0"; //Changing the version here updates it in all locations needed
     }
 
     public class DataShare
@@ -22,7 +22,7 @@ namespace MonkeyLoader.DoublePrecision
         public static List<World> frooxWorlds = new List<World>();
         public static List<GameObject> unityWorldRoots = new List<GameObject>();
         public static List<Vector3> worldOffset = new List<Vector3>();
-        //public static Vector3 FrooxEngineCameraPosition = Vector3.zero; //this may need to be added back in as a list if there are offset problems when switching worlds while moving.
+        public static List<Vector3> FrooxEngineCameraPosition = new List<Vector3>();
     }
 
     [HarmonyPatchCategory(nameof(WorldInitIntercept))]
@@ -43,7 +43,7 @@ namespace MonkeyLoader.DoublePrecision
                     DataShare.frooxWorlds.Add(__instance);
                     DataShare.unityWorldRoots.Add(worldConnector.WorldRoot);
                     DataShare.worldOffset.Add(Vector3.zero);
-                    //possibly add in FrooxEngineCameraPosition list init here if needed.
+                    DataShare.FrooxEngineCameraPosition.Add(Vector3.zero);
                 }
                 else
                 {
@@ -67,8 +67,6 @@ namespace MonkeyLoader.DoublePrecision
     {
         protected override IEnumerable<IFeaturePatch> GetFeaturePatches() => Enumerable.Empty<IFeaturePatch>();
 
-        private static Vector3 FrooxEngineCameraPosition = Vector3.zero;
-
         private static HeadOutput.HeadOutputType? prevOutputMode = null;
 
         private static void Postfix(HeadOutput __instance)
@@ -80,6 +78,8 @@ namespace MonkeyLoader.DoublePrecision
                 {
                     DataShare.frooxWorlds.RemoveAt(i);
                     DataShare.unityWorldRoots.RemoveAt(i);
+                    DataShare.worldOffset.RemoveAt(i);
+                    DataShare.FrooxEngineCameraPosition.RemoveAt(i);
                 }
                 else if (DataShare.frooxWorlds[i].Focus == World.WorldFocus.Focused)
                 {
@@ -94,8 +94,8 @@ namespace MonkeyLoader.DoublePrecision
             if (prevOutputMode is null) {
                 prevOutputMode = __instance.Type;
             }
-            Vector3 playerMotion = playerMotion = __instance.transform.position - FrooxEngineCameraPosition;
-            FrooxEngineCameraPosition = __instance.transform.position;
+            Vector3 playerMotion = playerMotion = __instance.transform.position - DataShare.FrooxEngineCameraPosition[index];
+            DataShare.FrooxEngineCameraPosition[index] = __instance.transform.position;
             switch (__instance.Type)
             {
                 case HeadOutput.HeadOutputType.VR:

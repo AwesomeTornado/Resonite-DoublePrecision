@@ -21,7 +21,6 @@ namespace MonkeyLoader.DoublePrecision
     {
         public static List<World> frooxWorlds = new List<World>();
         public static List<GameObject> unityWorldRoots = new List<GameObject>();
-        public static List<Vector3> worldOffset = new List<Vector3>();
         public static List<Vector3> FrooxEngineCameraPosition = new List<Vector3>();
     }
 
@@ -42,7 +41,6 @@ namespace MonkeyLoader.DoublePrecision
                 {
                     DataShare.frooxWorlds.Add(__instance);
                     DataShare.unityWorldRoots.Add(worldConnector.WorldRoot);
-                    DataShare.worldOffset.Add(Vector3.zero);
                     DataShare.FrooxEngineCameraPosition.Add(Vector3.zero);
                 }
                 else
@@ -67,8 +65,6 @@ namespace MonkeyLoader.DoublePrecision
     {
         protected override IEnumerable<IFeaturePatch> GetFeaturePatches() => Enumerable.Empty<IFeaturePatch>();
 
-        private static HeadOutput.HeadOutputType? prevOutputMode = null;
-
         private static void Postfix(HeadOutput __instance)
         {
             int index = -1;
@@ -78,7 +74,6 @@ namespace MonkeyLoader.DoublePrecision
                 {
                     DataShare.frooxWorlds.RemoveAt(i);
                     DataShare.unityWorldRoots.RemoveAt(i);
-                    DataShare.worldOffset.RemoveAt(i);
                     DataShare.FrooxEngineCameraPosition.RemoveAt(i);
                 }
                 else if (DataShare.frooxWorlds[i].Focus == World.WorldFocus.Focused)
@@ -91,47 +86,13 @@ namespace MonkeyLoader.DoublePrecision
                 Logger.Error(() => "There are no valid focused worlds! Fatal error, exiting function.");
                 return;
             }
-            if (prevOutputMode is null)
-            {
-                prevOutputMode = __instance.Type;
-            }
             Vector3 playerMotion = playerMotion = __instance.transform.position - DataShare.FrooxEngineCameraPosition[index];
             DataShare.FrooxEngineCameraPosition[index] = __instance.transform.position;
-            switch (__instance.Type)
-            {
-                case HeadOutput.HeadOutputType.VR:
-                    {
-                        if (prevOutputMode != HeadOutput.HeadOutputType.VR)
-                        {
-                            prevOutputMode = HeadOutput.HeadOutputType.VR;//reset prev output mode
-                            DataShare.unityWorldRoots[index].transform.position = DataShare.worldOffset[index];
-                            DataShare.worldOffset[index] = Vector3.zero;
-                        }
-                        DataShare.unityWorldRoots[index].transform.position -= playerMotion;
-                        //needed for VR? Remove if there are problems.
-                        //DataShare.unityWorldRoots[index].transform.localScale = Reciprocal(__instance.transform.localScale);
-                        break;
-                    }
-                case HeadOutput.HeadOutputType.Screen:
-                    {
-                        if (prevOutputMode != HeadOutput.HeadOutputType.Screen)
-                        {
-                            prevOutputMode = HeadOutput.HeadOutputType.Screen;//reset prev output mode
-                            DataShare.worldOffset[index] = DataShare.unityWorldRoots[index].transform.position;
-                            DataShare.unityWorldRoots[index].transform.position = Vector3.zero;
-                        }
-                        DataShare.unityWorldRoots[index].transform.position -= playerMotion;// expiremental
-                        Vector3 pos = __instance.transform.position;
-                        //Vector3 scl = __instance.transform.localScale;
-                        __instance._viewPos -= new float3(pos.x, pos.y, pos.z);
-                        //__instance._viewScl /= new float3(scl.x, scl.y, scl.z);
-                        DataShare.worldOffset[index] -= playerMotion;//move this to record where the world *should* be, instead of moving the world.
-                        //TODO: With some of the recent changes, the world offset variable may no longer be needed.
-                        //TODO: In fact, it is likely causing problems due to applying the offset twice.
-                        break;
-                    }
-            }
-            prevOutputMode = __instance.Type;
+            Vector3 pos = __instance.transform.position;
+            //Vector3 scl = __instance.transform.localScale;
+            __instance._viewPos -= new float3(pos.x, pos.y, pos.z);
+
+            DataShare.unityWorldRoots[index].transform.position -= playerMotion;
             __instance.transform.position = Vector3.zero;
             //__instance.transform.localScale = Vector3.one;
         }

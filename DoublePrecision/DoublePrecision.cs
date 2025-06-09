@@ -109,7 +109,7 @@ namespace MonkeyLoader.DoublePrecision
                         }
                         DataShare.unityWorldRoots[index].transform.position -= playerMotion;
                         //needed for VR? Remove if there are problems.
-                        DataShare.unityWorldRoots[index].transform.localScale = Reciprocal(__instance.transform.localScale);
+                        //DataShare.unityWorldRoots[index].transform.localScale = Reciprocal(__instance.transform.localScale);
                         break;
                     }
                 case HeadOutput.HeadOutputType.Screen:
@@ -122,16 +122,18 @@ namespace MonkeyLoader.DoublePrecision
                         }
                         DataShare.unityWorldRoots[index].transform.position -= playerMotion;// expiremental
                         Vector3 pos = __instance.transform.position;
-                        Vector3 scl = __instance.transform.localScale;
+                        //Vector3 scl = __instance.transform.localScale;
                         __instance._viewPos -= new float3(pos.x, pos.y, pos.z);
-                        __instance._viewScl /= new float3(scl.x, scl.y, scl.z);
+                        //__instance._viewScl /= new float3(scl.x, scl.y, scl.z);
                         DataShare.worldOffset[index] -= playerMotion;//move this to record where the world *should* be, instead of moving the world.
+                        //TODO: With some of the recent changes, the world offset variable may no longer be needed.
+                        //TODO: In fact, it is likely causing problems due to applying the offset twice.
                         break;
                     }
             }
             prevOutputMode = __instance.Type;
             __instance.transform.position = Vector3.zero;
-            __instance.transform.localScale = Vector3.one;
+            //__instance.transform.localScale = Vector3.one;
         }
 
         private static Vector3 Reciprocal(Vector3 xyz)

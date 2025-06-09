@@ -91,7 +91,8 @@ namespace MonkeyLoader.DoublePrecision
                 Logger.Error(() => "There are no valid focused worlds! Fatal error, exiting function.");
                 return;
             }
-            if (prevOutputMode is null) {
+            if (prevOutputMode is null)
+            {
                 prevOutputMode = __instance.Type;
             }
             Vector3 playerMotion = playerMotion = __instance.transform.position - DataShare.FrooxEngineCameraPosition[index];
@@ -107,6 +108,8 @@ namespace MonkeyLoader.DoublePrecision
                             DataShare.worldOffset[index] = Vector3.zero;
                         }
                         DataShare.unityWorldRoots[index].transform.position -= playerMotion;
+                        //needed for VR? Remove if there are problems.
+                        DataShare.unityWorldRoots[index].transform.localScale = Reciprocal(__instance.transform.localScale);
                         break;
                     }
                 case HeadOutput.HeadOutputType.Screen:
@@ -123,6 +126,12 @@ namespace MonkeyLoader.DoublePrecision
             }
             prevOutputMode = __instance.Type;
             __instance.transform.position = Vector3.zero;
+            __instance.transform.localScale = Vector3.one;
+        }
+
+        private static Vector3 Reciprocal(Vector3 xyz)
+        {
+            return new Vector3(1/xyz.x, 1/xyz.y, 1/xyz.z);
         }
     }
 }

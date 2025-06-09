@@ -121,8 +121,10 @@ namespace MonkeyLoader.DoublePrecision
                             DataShare.unityWorldRoots[index].transform.position = Vector3.zero;
                         }
                         DataShare.unityWorldRoots[index].transform.position -= playerMotion;// expiremental
-                        Vector3 xyz = __instance.transform.position;
-                        __instance._viewPos -= new float3(xyz.x, xyz.y, xyz.z);
+                        Vector3 pos = __instance.transform.position;
+                        Vector3 scl = __instance.transform.localScale;
+                        __instance._viewPos -= new float3(pos.x, pos.y, pos.z);
+                        __instance._viewScl /= new float3(scl.x, scl.y, scl.z);
                         DataShare.worldOffset[index] -= playerMotion;//move this to record where the world *should* be, instead of moving the world.
                         break;
                     }

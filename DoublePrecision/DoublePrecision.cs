@@ -14,14 +14,14 @@ namespace MonkeyLoader.DoublePrecision
 {
     public class AssemblyInfo
     {
-        internal const string VERSION_CONSTANT = "1.4.0"; //Changing the version here updates it in all locations needed
+        internal const string VERSION_CONSTANT = "1.5.0"; //Changing the version here updates it in all locations needed
     }
 
     public class DataShare
     {
         public static List<World> frooxWorlds = new List<World>();
         public static List<GameObject> unityWorldRoots = new List<GameObject>();
-        public static List<Vector3> FrooxEngineCameraPosition = new List<Vector3>();
+        public static List<Vector3> FrooxCameraPosition = new List<Vector3>();
     }
 
     [HarmonyPatchCategory(nameof(WorldInitIntercept))]
@@ -41,7 +41,7 @@ namespace MonkeyLoader.DoublePrecision
                 {
                     DataShare.frooxWorlds.Add(__instance);
                     DataShare.unityWorldRoots.Add(worldConnector.WorldRoot);
-                    DataShare.FrooxEngineCameraPosition.Add(Vector3.zero);
+                    DataShare.FrooxCameraPosition.Add(Vector3.zero);
                 }
                 else
                 {
@@ -74,7 +74,7 @@ namespace MonkeyLoader.DoublePrecision
                 {
                     DataShare.frooxWorlds.RemoveAt(i);
                     DataShare.unityWorldRoots.RemoveAt(i);
-                    DataShare.FrooxEngineCameraPosition.RemoveAt(i);
+                    DataShare.FrooxCameraPosition.RemoveAt(i);
                 }
                 else if (DataShare.frooxWorlds[i].Focus == World.WorldFocus.Focused)
                 {
@@ -86,20 +86,13 @@ namespace MonkeyLoader.DoublePrecision
                 Logger.Error(() => "There are no valid focused worlds! Fatal error, exiting function.");
                 return;
             }
-            Vector3 playerMotion = playerMotion = __instance.transform.position - DataShare.FrooxEngineCameraPosition[index];
-            DataShare.FrooxEngineCameraPosition[index] = __instance.transform.position;
+            Vector3 playerMotion = __instance.transform.position - DataShare.FrooxCameraPosition[index];
+            DataShare.FrooxCameraPosition[index] = __instance.transform.position;
             Vector3 pos = __instance.transform.position;
-            //Vector3 scl = __instance.transform.localScale;
             __instance._viewPos -= new float3(pos.x, pos.y, pos.z);
-
+            //Do we really need viewScale?
             DataShare.unityWorldRoots[index].transform.position -= playerMotion;
             __instance.transform.position = Vector3.zero;
-            //__instance.transform.localScale = Vector3.one;
-        }
-
-        private static Vector3 Reciprocal(Vector3 xyz)
-        {
-            return new Vector3(1/xyz.x, 1/xyz.y, 1/xyz.z);
         }
     }
 }
@@ -117,6 +110,7 @@ namespace MonkeyLoader.DoublePrecision
  *  ViewPos -= Transform.position makes screen camera stay still, while avatar moves (Only in screen mode?)
  *  ViewPos += Transform.position makes avatar stay still, while player camera moves (Only in screen mode?)
  * 
+ *  ViewPos doesn't seem to do anything in VR mode.
  * 
  */
 

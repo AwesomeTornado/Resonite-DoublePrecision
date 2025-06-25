@@ -404,68 +404,7 @@ namespace MonkeyLoader.DoublePrecision
         }
     }
 
-    //[HarmonyPatchCategory(nameof(PBS_Triplanar__Choco__Specular))]
-    //[HarmonyPatch(typeof(MaterialConnector), nameof(MaterialConnector.BeginUpload))]
-    //internal class PBS_Triplanar__Choco__Specular : ResoniteMonkey<PBS_Triplanar__Choco__Specular>
-    //{
-    //    protected override IEnumerable<IFeaturePatch> GetFeaturePatches() => Enumerable.Empty<IFeaturePatch>();
-    //    private static bool Prefix(MaterialConnector __instance, ref bool instanceChanged, ref bool __result)
-    //    {
-    //        global::FrooxEngine.Shader? shader = __instance.targetShader;
-    //        global::UnityEngine.Shader? shader2 = ((shader != null) ? shader.GetUnity() : null);
-
-    //        if (shader2 == null)
-    //        {
-    //            if (__instance._unityMaterial != null)
-    //            {
-    //                instanceChanged = true;
-    //                __instance.CleanupMaterial();
-    //            }
-    //            __result = false;
-    //            return false;
-    //        }
-    //        if (__instance._unityMaterial == null)
-    //        {
-    //            __instance._unityMaterial = new global::UnityEngine.Material(shader2);
-    //            instanceChanged = true;
-    //        }
-    //        else if (__instance.UnityMaterial.shader != shader2)
-    //        {
-    //            __instance.UnityMaterial.shader = shader2;
-    //        }
-    //        __result = true;
-    //        Shaders.ShaderName? name = Shaders.stringToName(shader.ShaderName);
-    //        if (name is null)
-    //        {
-    //            //Logger.Info(() => "Shader is not an official triplanar");
-    //            return false;
-    //        }
-    //        Shaders.ShaderName notNullName = (Shaders.ShaderName)name;
-    //        Logger.Info(() => "[In Progress] Updating triplanar to use Choco shader...");
-    //        FrooxEngine.Shader? ChocoShader = Shaders.GetShader(notNullName);
-    //        Logger.Info(() => "[In Progress] GetShader returned, checking for null...");
-    //        if (ChocoShader is null)
-    //        {
-    //            Logger.Error(() => "Attempted to initialize ChocoShader and recieved NULL");
-    //            return false;
-    //        }
-    //        Logger.Info(() => "[In Progress] Success! Attempting to apply to UnityShader...");
-    //        var unityShader = ChocoShader.GetUnity();
-    //        Logger.Info(() => "[In Progress] Step one of three...");
-    //        __instance.UnityMaterial.shader = unityShader;
-    //        Logger.Info(() => "[In Progress] Success! Step two of three...");
-    //        __instance._unityMaterial.shader = unityShader;
-    //        Logger.Info(() => "[In Progress] Success! Step three of three...");
-    //        __instance.targetShader = ChocoShader;
-    //        Logger.Info(() => "[In Progress] Success! All materials and shaders applied.");
-    //        //__instance._unityMaterial = new global::UnityEngine.Material(unityShader);
-    //        Logger.Info(() => "[Done!] Updated shader to use custom Choco shader!");
-    //        instanceChanged = true;
-    //        return false;
-
-    //    }
-    //}
-    //[HarmonyPatchCategory(nameof(PBS_Tri_Metal_Overhaul))]
+    [HarmonyPatchCategory(nameof(PBS_Tri_Metal_Overhaul))]
     internal class PBS_Tri_Metal_Overhaul : ResoniteMonkey<PBS_Tri_Metal_Overhaul>
     {
 
@@ -479,117 +418,23 @@ namespace MonkeyLoader.DoublePrecision
             if (__instance.Transparent)
             {
                 __result = __instance.EnsureSharedShader(__instance._transparent, new Uri(Shaders.resdb_choco_transparent)).Asset;
-                //Shaders.GetShader(ShaderName.PBS_TriplanarTransparent);
-                //_transparent.Target = Shaders.GetStaticShaderFromName(ShaderName.PBS_TriplanarTransparent);
                 return false;
             }
             __result = __instance.EnsureSharedShader(__instance._regular, new Uri(Shaders.resdb_choco)).Asset;
-            //Shaders.GetShader(ShaderName.PBS_Triplanar);
-            //_regular.Target = Shaders.GetStaticShaderFromName(ShaderName.PBS_Triplanar);
-            //__result = Shaders.GetShader(ShaderName.PBS_Triplanar);
             return false; //never run original function
         }
-
-        [HarmonyPatch(typeof(PBS_TriplanarMetallic), nameof(PBS_TriplanarMetallic.GetSyncMember))]
-        private static bool Prefix(PBS_TriplanarMetallic __instance, int index, ref ISyncMember __result)
-        {
-            Logger.Info(() => "PBS_TriplanarMetallic.GetSyncMember");
-            switch (index)
-            {
-                case 0:
-                    __result = __instance.persistent;
-                    return false;
-                case 1:
-                    __result = __instance.updateOrder;
-                    return false;
-                case 2:
-                    __result = __instance.EnabledField;
-                    return false;
-                case 3:
-                    __result = __instance.HighPriorityIntegration;
-                    return false;
-                case 4:
-                    __result = __instance.TextureScale;
-                    return false;
-                case 5:
-                    __result = __instance.TextureOffset;
-                    return false;
-                case 6:
-                    __result = __instance.AlbedoColor;
-                    return false;
-                case 7:
-                    __result = __instance.AlbedoTexture;
-                    return false;
-                case 8:
-                    __result = __instance.EmissiveColor;
-                    return false;
-                case 9:
-                    __result = __instance.EmissiveMap;
-                    return false;
-                case 10:
-                    __result = __instance.NormalMap;
-                    return false;
-                case 11:
-                    __result = __instance.NormalScale;
-                    return false;
-                case 12:
-                    __result = __instance.OcclusionMap;
-                    return false;
-                case 13:
-                    __result = __instance.TriplanarBlendPower;
-                    return false;
-                case 14:
-                    __result = __instance.ObjectSpace;
-                    return false;
-                case 15:
-                    __result = __instance.OffsetFactor;
-                    return false;
-                case 16:
-                    __result = __instance.OffsetUnits;
-                    return false;
-                case 17:
-                    __result = __instance.Culling;
-                    return false;
-                case 18:
-                    __result = __instance.Transparent;
-                    return false;
-                case 19:
-                    __result = __instance.RenderQueue;
-                    return false;
-                case 20:
-                    __result = __instance.Metallic;
-                    return false;
-                case 21:
-                    __result = __instance.Smoothness;
-                    return false;
-                case 22:
-                    __result = __instance.MetallicMap;
-                    return false;
-                case 23:
-                    __result = __instance._regular;
-                    return false;
-                case 24:
-                    __result = __instance._transparent;
-                    return false;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
-            return false;
-        }
-
-        protected static readonly AssetRef<FrooxEngine.Shader> _regular = new AssetRef<FrooxEngine.Shader>();
-
-        protected static readonly AssetRef<FrooxEngine.Shader> _transparent = new AssetRef<FrooxEngine.Shader>();
 
         [HarmonyPatch(typeof(PBS_TriplanarMetallic), nameof(PBS_TriplanarMetallic.InitializeSyncMembers))]
         private static bool Prefix(PBS_TriplanarMetallic __instance)
         {
-            _regular.MarkNonPersistent();
-            _regular.MarkNonDrivable();
-            _transparent.MarkNonPersistent();
-            _transparent.MarkNonDrivable();
-            //_regular.IsLocalElement = true;
-            //_transparent.IsLocalElement = true;
+            var w = Userspace.UserspaceWorld;
+            w.RunInUpdates(5, () =>
+            {
+                __instance._regular.IsDrivable = true;
+                __instance._regular.DriveFrom(__instance._regular, true);
+                __instance._transparent.IsDrivable = true;
+                __instance._transparent.DriveFrom(__instance._transparent, true);
+            });
             return true;
         }
     }
@@ -597,8 +442,6 @@ namespace MonkeyLoader.DoublePrecision
     [HarmonyPatchCategory(nameof(PBS_Tri_Specular_Overhaul))]
     internal class PBS_Tri_Specular_Overhaul : ResoniteMonkey<PBS_Tri_Specular_Overhaul>
     {
-
-
         protected override IEnumerable<IFeaturePatch> GetFeaturePatches() => Enumerable.Empty<IFeaturePatch>();
 
         [HarmonyPatch(typeof(PBS_TriplanarSpecular), nameof(PBS_TriplanarSpecular.GetShader))]
@@ -608,153 +451,15 @@ namespace MonkeyLoader.DoublePrecision
             if (__instance.Transparent)
             {
                 __result = __instance.EnsureSharedShader(__instance._transparent, new Uri(Shaders.resdb_choco_transparent_specular)).Asset;
-                //trans.Target = _transparent.Target;
-                //_transparent.DriveFrom(trans);
-                //Shaders.GetShader(ShaderName.PBS_TriplanarTransparent);
-                //_transparent.Target = Shaders.GetStaticShaderFromName(ShaderName.PBS_TriplanarTransparent);
                 return false;
             }
             __result = __instance.EnsureSharedShader(__instance._regular, new Uri(Shaders.resdb_choco_specular)).Asset;
-            //reg.Target = _regular.Target;
-            //_transparent.DriveFrom(reg);
-            //Shaders.GetShader(ShaderName.PBS_Triplanar);
-            //_regular.Target = Shaders.GetStaticShaderFromName(ShaderName.PBS_Triplanar);
-            //__result = Shaders.GetShader(ShaderName.PBS_Triplanar);
             return false; //never run original function
         }
-
-        //[HarmonyPatch(typeof(PBS_TriplanarSpecular), nameof(PBS_TriplanarSpecular.GetSyncMember))]
-        //private static bool Prefix(PBS_TriplanarSpecular __instance, int index, ref ISyncMember __result)
-        //{
-        //    Logger.Info(() => "PBS_TriplanarSpecular.GetSyncMember");
-        //    switch (index)
-        //    {
-        //        case 0:
-        //            __result = __instance.persistent;
-        //            return false;
-        //        case 1:
-        //            __result = __instance.updateOrder;
-        //            return false;
-        //        case 2:
-        //            __result = __instance.EnabledField;
-        //            return false;
-        //        case 3:
-        //            __result = __instance.HighPriorityIntegration;
-        //            return false;
-        //        case 4:
-        //            __result = __instance.TextureScale;
-        //            return false;
-        //        case 5:
-        //            __result = __instance.TextureOffset;
-        //            return false;
-        //        case 6:
-        //            __result = __instance.AlbedoColor;
-        //            return false;
-        //        case 7:
-        //            __result = __instance.AlbedoTexture;
-        //            return false;
-        //        case 8:
-        //            __result = __instance.EmissiveColor;
-        //            return false;
-        //        case 9:
-        //            __result = __instance.EmissiveMap;
-        //            return false;
-        //        case 10:
-        //            __result = __instance.NormalMap;
-        //            return false;
-        //        case 11:
-        //            __result = __instance.NormalScale;
-        //            return false;
-        //        case 12:
-        //            __result = __instance.OcclusionMap;
-        //            return false;
-        //        case 13:
-        //            __result = __instance.TriplanarBlendPower;
-        //            return false;
-        //        case 14:
-        //            __result = __instance.ObjectSpace;
-        //            return false;
-        //        case 15:
-        //            __result = __instance.OffsetFactor;
-        //            return false;
-        //        case 16:
-        //            __result = __instance.OffsetUnits;
-        //            return false;
-        //        case 17:
-        //            __result = __instance.Culling;
-        //            return false;
-        //        case 18:
-        //            __result = __instance.Transparent;
-        //            return false;
-        //        case 19:
-        //            __result = __instance.RenderQueue;
-        //            return false;
-        //        case 20:
-        //            __result = __instance.SpecularColor;
-        //            return false;
-        //        case 21:
-        //            __result = __instance.SpecularMap;
-        //            return false;
-        //        case 22:
-        //            //__instance.GetShader();
-        //            System.Diagnostics.StackTrace t1 = new System.Diagnostics.StackTrace();
-        //            FrooxEngine.Shader shader = (FrooxEngine.Shader)_regularTEST.Target;
-        //            Logger.Info(() => "Shader name is " + shader.ShaderName);
-        //            if(shader.ShaderName == Shaders.resdb_froox_specular)//this is probably using resdb links, not certain though. The log line above will prove or disprove this later
-        //            {
-        //                Logger.Info(() => "Detected official shader, someone synced it to this client");
-        //                //then we need to somehow "unsync" it...
-        //                //_regularTEST.IsDriven = true;
-        //                //I understand so little of this syncing code lol
-        //                //but what I do understand, is that when a Sync variable changes, it automatically
-        //                //syncs to all the other users. Unless its being driven (not based off of code, just
-        //                //based off of experience)
-        //                //well, I would love to. The problem is, You can only drive things *from a sync!*
-        //                //ooh?
-        //                //__instance._regular.DriveFrom(); //<<-- this requires a sync to work
-        //                //I'll check vrik out though.
-        //                //different, I just found DriveFrom through intellisense.
-        //                //not sure how that does it.
-        //                //Maybe it means it was *set* by the code, but doesn't mean *driven* by the code?
-        //                //but... the websocket enabled thing *is* driven by the code, and isn't blue.
-        //                //ok, hmm...
-        //            }
-        //            Logger.Error(() => _regularTEST.Target + "\n" + t1.ToString());
-        //            __result = _regularTEST;
-        //            return false;
-        //        case 23:
-        //            //__instance.GetShader();
-        //            System.Diagnostics.StackTrace t2 = new System.Diagnostics.StackTrace();
-        //            Logger.Error(() => _transparentTEST.Target + "\n" + t2.ToString());
-        //            __result = _transparentTEST;
-        //            return false;
-        //        default:
-        //            throw new ArgumentOutOfRangeException();
-        //    }
-        //    return false;
-        //}
-
-        protected static readonly AssetRef<FrooxEngine.Shader> _regularTEST = new AssetRef<FrooxEngine.Shader>();
-
-        protected static readonly AssetRef<FrooxEngine.Shader> _transparentTEST = new AssetRef<FrooxEngine.Shader>();
-
-        protected static readonly AssetRef<FrooxEngine.Shader> reg = new AssetRef<FrooxEngine.Shader>();
-
-        protected static readonly AssetRef<FrooxEngine.Shader> trans = new AssetRef<FrooxEngine.Shader>();
 
         [HarmonyPatch(typeof(PBS_TriplanarSpecular), nameof(PBS_TriplanarSpecular.InitializeSyncMembers))]
         private static void Postfix(PBS_TriplanarSpecular __instance)
         {
-            //reg.Target = Shaders.GetStaticShaderFromName(ShaderName.PBS_TriplanarSpecular);
-            //trans.Target = Shaders.GetStaticShaderFromName(ShaderName.PBS_TriplanarTransparent);
-            if (reg.Target is null || trans.Target is null)
-            {
-                //    Logger.Error(() => "Reg or Trans is NULL");
-            }
-            _regularTEST.MarkNonPersistent();
-
-            //_regular.DriveFrom(reg);
-            _transparentTEST.MarkNonPersistent();
             var w = Userspace.UserspaceWorld;
             w.RunInUpdates(5, () =>
             {
@@ -763,28 +468,8 @@ namespace MonkeyLoader.DoublePrecision
                 __instance._transparent.IsDrivable = true;
                 __instance._transparent.DriveFrom(__instance._transparent, true);
             });
-
-            //testing time, i'll have to switch worlds
-            //wait one sec
-            //_transparent.DriveFrom(trans);
-            //Maybe don't mark non drivable, and then drive it yourself?
-            //_regular.IsLocalElement = true;
-            //_transparent.IsLocalElement = true;
-            //return true;
         }
     }
-
-    //[HarmonyPatchCategory(nameof(mat_connector))]
-    //[HarmonyPatch(typeof(DynamicAssetProvider<FrooxEngine.Material>), "_asset", MethodType.Getter)]
-    //internal class mat_connector : ResoniteMonkey<mat_connector>
-    //{
-    //    protected override IEnumerable<IFeaturePatch> GetFeaturePatches() => Enumerable.Empty<IFeaturePatch>();
-    //    private static bool Prefix()
-    //    {
-    //        Logger.Info(() => "DynamicAssetProvider<FrooxEngine.Material>");
-    //        return false;
-    //    }
-    //}
 
     [HarmonyPatchCategory(nameof(TriplanarInitIntercept))]
     [HarmonyPatch(typeof(PBS_TriplanarMaterial), nameof(PBS_TriplanarMaterial.InitializeSyncMembers))]
@@ -795,211 +480,7 @@ namespace MonkeyLoader.DoublePrecision
         {
             Logger.Info(() => "New Material initialized!");
             DataShare.FrooxMaterials.Add(__instance);
-            //Uri url = __instance .GetShader().AssetURL;
-            //    Uri newUri = new Uri("https://example.com");
-            //    bool updated = false;
-            //    //Logger.Info(() => url);
-            //    switch (url.AbsoluteUri)
-            //    {
-            //        case Shaders.resdb_froox:
-            //            updated = true;
-            //            newUri = new Uri(Shaders.resdb_choco);
-            //            break;
-            //        case Shaders.resdb_froox_specular:
-            //            updated = true;
-            //            newUri = new Uri(Shaders.resdb_choco_specular);
-            //            break;
-            //        case Shaders.resdb_froox_transparent:
-            //            updated = true;
-            //            newUri = new Uri(Shaders.resdb_choco_transparent);
-            //            break;
-            //        case Shaders.resdb_froox_transparent_specular:
-            //            updated = true;
-            //            newUri = new Uri(Shaders.resdb_choco_transparent_specular);
-            //            break;
-            //    }
-            //    if (updated)
-            //    {
-            //        FrooxEngine.Shader newShader = new FrooxEngine.Shader();
-            //        newShader.SetURL(newUri);
-            //        //newShader.InitializeConnector();
-            //        __instance._asset.SetURL(newUri);// .SetURL(newUri);
-            //    }
-            //}
         }
-        //protected StaticShader GetSharedShader(Uri url)
-
-        //[HarmonyPatchCategory(nameof(MatProvInject))]
-        //[HarmonyPatch(typeof(MaterialProvider), nameof(MaterialProvider.GetSharedShader))]
-        //internal class MatProvInject : ResoniteMonkey<MatProvInject>
-        //{
-        //    protected override IEnumerable<IFeaturePatch> GetFeaturePatches() => Enumerable.Empty<IFeaturePatch>();
-        //    private static void Postfix(MaterialProvider __instance, Uri url, ref StaticShader __result)
-        //    {
-        //        //Logger.Info(() => "Slot");
-        //        bool updated = false;
-        //        switch (url.AbsoluteUri)
-        //        {
-        //            case Shaders.resdb_froox:
-        //                updated = true;
-        //                url = new Uri(Shaders.resdb_choco);
-        //                break;
-        //            case Shaders.resdb_froox_specular:
-        //                updated = true;
-        //                url = new Uri(Shaders.resdb_choco_specular);
-        //                break;
-        //            case Shaders.resdb_froox_transparent:
-        //                updated = true;
-        //                url = new Uri(Shaders.resdb_choco_transparent);
-        //                break;
-        //            case Shaders.resdb_froox_transparent_specular:
-        //                updated = true;
-        //                url = new Uri(Shaders.resdb_choco_transparent_specular);
-        //                break;
-        //        }
-
-
-        //        if (url == null)
-        //        {
-        //            __result = null;
-        //        }
-        //        if (__instance.IsLocalElement)
-        //        {
-        //            __result = __instance.World.GetLocalRegisteredComponent<StaticShader>(url.OriginalString, delegate (StaticShader provider)
-        //            {
-        //                provider.URL.Value = url;
-        //            }, true, false);
-        //        }
-        //        StaticShader sharedComponentOrCreate = __instance.World.GetSharedComponentOrCreate(__instance.Cloud.Assets.DBSignature(url, false), delegate (StaticShader provider)
-        //        {
-        //            provider.URL.Value = url;
-        //        }, 0, true, false, new Func<Slot>(__instance.GetShaderRoot));
-        //        sharedComponentOrCreate.Persistent = false;
-        //        __result = sharedComponentOrCreate;
-        //    }
-        //}
-
-        //[HarmonyPatchCategory(nameof(ShaderInjector))]
-        //[HarmonyPatch(typeof(MaterialConnector), nameof(MaterialConnector.BeginUpload))]
-        //internal class ShaderInjector : ResoniteMonkey<ShaderInjector>
-        //{
-        //    protected override IEnumerable<IFeaturePatch> GetFeaturePatches() => Enumerable.Empty<IFeaturePatch>();
-        //    private static void Prefix(MaterialConnector __instance)
-        //    {
-
-        //        Uri url = __instance.targetShader.AssetURL;
-        //        Uri newUri = new Uri("https://example.com");
-        //        bool updated = false;
-        //        //Logger.Info(() => url);
-        //        switch (url)
-        //        {
-        //            case new Uri(Shaders.resdb_froox):
-        //                updated = true;
-        //                newUri = new Uri(Shaders.resdb_choco);
-        //                break;
-        //            case Shaders.resdb_froox_specular:
-        //                updated = true;
-        //                newUri = new Uri(Shaders.resdb_choco_specular);
-        //                break;
-        //            case Shaders.resdb_froox_transparent:
-        //                updated = true;
-        //                newUri = new Uri(Shaders.resdb_choco_transparent);
-        //                break;
-        //            case Shaders.resdb_froox_transparent_specular:
-        //                updated = true;
-        //                newUri = new Uri(Shaders.resdb_choco_transparent_specular);
-        //                break;
-        //        }
-        //        if (updated)
-        //        {
-        //            FrooxEngine.Shader newShader = new FrooxEngine.Shader();
-        //            newShader.SetURL(newUri);
-        //            //newShader.InitializeConnector();
-        //            __instance.targetShader = newShader;
-        //        }
-
-        //    }
-        //}
-
-        //[HarmonyPatchCategory(nameof(AssetInjection))]
-        //[HarmonyPatch(typeof(AssetInterface), nameof(AssetInterface.GatherAsset))]
-        //internal class AssetInjection : ResoniteMonkey<AssetInjection>
-        //{
-        //    protected override IEnumerable<IFeaturePatch> GetFeaturePatches() => Enumerable.Empty<IFeaturePatch>();
-        //    private static void Prefix(AssetInterface __instance, string signature)
-        //    {
-        //        switch (signature)
-        //        {
-        //            case Shaders.froox:
-        //                signature = Shaders.choco;
-        //                break;
-        //            case Shaders.froox_specular:
-        //                signature = Shaders.choco_specular;
-        //                break;
-        //            case Shaders.froox_transparent:
-        //                signature = Shaders.choco_transparent;
-        //                break;
-        //            case Shaders.froox_transparent_specular:
-        //                signature = Shaders.choco_transparent_specular;
-        //                break;
-        //        }
-
-        //        Logger.Info(() => "Hash injected from AssetInterface.GatherAsset()");
-        //    }
-        //}
-        ////StaticAssetProvider<Shader, ShaderMetadata, ShaderVariantDescriptor>
-        //[HarmonyPatchCategory(nameof(URLInjection))]
-        //[HarmonyPatch(typeof(Asset), "AssetURL", MethodType.Getter)]
-        //internal class URLInjection : ResoniteMonkey<URLInjection>
-        //{
-        //    protected override IEnumerable<IFeaturePatch> GetFeaturePatches() => Enumerable.Empty<IFeaturePatch>();
-        //    private static void Prefix(ref Uri __result)
-        //    {
-        //        Logger.Info(() => "Asset URL injection (getter)");
-        //        string url = "";
-        //        bool initialized = false;
-        //        string originalURL = __result.AbsoluteUri;
-        //        Logger.Info(() => originalURL);
-        //        switch (__result.AbsoluteUri)
-        //        {
-        //            case Shaders.resdb_froox:
-        //                url = Shaders.resdb_choco;
-        //                initialized = true;
-        //                break;
-        //            case Shaders.resdb_froox_specular:
-        //                url = Shaders.resdb_choco_specular;
-        //                initialized = true;
-        //                break;
-        //            case Shaders.resdb_froox_transparent:
-        //                url = Shaders.resdb_choco_transparent;
-        //                initialized = true;
-        //                break;
-        //            case Shaders.resdb_froox_transparent_specular:
-        //                url = Shaders.choco_transparent_specular;
-        //                initialized = true;
-        //                break;
-        //        }
-        //        if (initialized)
-        //        {
-        //            __result = new Uri(url);
-        //            Logger.Info(() => "ResDB injected from StaticAssetProvider.URL (getter)");
-        //        }
-
-        //    }
-        //}
-
-
-        //[HarmonyPatchCategory(nameof(AssetRefInjection))]
-        //[HarmonyPatch(typeof(AssetRef<FrooxEngine.Shader>), "Asset", MethodType.Getter)]
-        //internal class AssetRefInjection : ResoniteMonkey<AssetRefInjection>
-        //{
-        //    protected override IEnumerable<IFeaturePatch> GetFeaturePatches() => Enumerable.Empty<IFeaturePatch>();
-        //    public static void Postfix(AssetRef<FrooxEngine.Shader> __instance, ref FrooxEngine.Shader __result)
-        //    {
-        //        Uri url = __result.AssetURL;
-        //        Logger.Info(() => url);
-        //    }
-        //}
 
     }
 

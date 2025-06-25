@@ -8,7 +8,6 @@ using System.Linq;
 using UnityEngine;
 using UnityFrooxEngineRunner;
 using System;
-using static MonkeyLoader.DoublePrecision.Shaders;
 
 namespace MonkeyLoader.DoublePrecision
 {
@@ -32,9 +31,9 @@ namespace MonkeyLoader.DoublePrecision
     {
         protected override IEnumerable<IFeaturePatch> GetFeaturePatches() => Enumerable.Empty<IFeaturePatch>();
 
-        private static int IsUserspaceInitialized = 0;
+        private static int IsUserspaceInitialized = 1;
         private static bool ManualMutexErrorCatch = false;
-        private static void Postfix(World __instance)
+        public static void Postfix(World __instance)
         {
             if (ManualMutexErrorCatch)
             {
@@ -103,7 +102,13 @@ namespace MonkeyLoader.DoublePrecision
             }
             if (index == -1)
             {
-                //Logger.Error(() => "There are no valid focused worlds! Fatal error, exiting function.");
+                Logger.Error(() => "There are no valid focused worlds! Fatal error, Attepting worlds list regeneration.");
+                World w = Userspace.UserspaceWorld;
+                var worldsList = w.WorldManager.Worlds;
+                foreach (World world in worldsList)
+                {
+                    WorldInitIntercept.Postfix(world);
+                }
                 return;
             }
             //Vector3 xyz = __instance.transform.localScale;
@@ -158,21 +163,36 @@ namespace MonkeyLoader.DoublePrecision
         [HarmonyPatch(typeof(PBS_TriplanarMetallic), nameof(PBS_TriplanarMetallic.GetShader))]
         private static bool Prefix(PBS_TriplanarMetallic __instance, ref FrooxEngine.Shader __result)
         {
-            Logger.Info(() => "(PBS_TriplanarMetallic.GetShader)");
+            Uri URL;
+            Logger.Debug(() => "PBS_TriplanarMetallic.GetShader");
             if (__instance.Transparent)
             {
-                __result = __instance.EnsureSharedShader(__instance._transparent, new Uri(Shaders.resdb_choco_transparent)).Asset;
+                URL = new Uri(Shaders.resdb_choco_transparent);
+                __result = __instance.EnsureSharedShader(__instance._transparent, URL).Asset;
+                ((StaticShader)__instance._transparent.Target).URL.DriveFrom(((StaticShader)__instance._transparent.Target).URL, true);
+                if (((StaticShader)__instance._transparent.Target).URL != URL)
+                {
+                    Logger.Warn(() => "EnsureSharedShader returned the wrong url, attempting to manually change after applying local drive w/ writeback");
+                    ((StaticShader)__instance._transparent.Target).URL.ForceSet(URL);
+                }
                 return false;
             }
-            __result = __instance.EnsureSharedShader(__instance._regular, new Uri(Shaders.resdb_choco)).Asset;
+            URL = new Uri(Shaders.resdb_choco);
+            __result = __instance.EnsureSharedShader(__instance._regular, URL).Asset;
+            ((StaticShader)__instance._regular.Target).URL.DriveFrom(((StaticShader)__instance._regular.Target).URL, true);
+            if (((StaticShader)__instance._regular.Target).URL != URL)
+            {
+                Logger.Warn(() => "EnsureSharedShader returned the wrong url, attempting to manually change after applying local drive w/ writeback");
+                ((StaticShader)__instance._regular.Target).URL.ForceSet(URL);
+            }
             return false; //never run original function
         }
 
-        [HarmonyPatch(typeof(PBS_TriplanarMetallic), nameof(PBS_TriplanarMetallic.InitializeSyncMembers))]
+        [HarmonyPatch(typeof(PBS_TriplanarMetallic), nameof(PBS_TriplanarMetallic.InitializeSyncMembers))]//TODO: this entire patch can likely be remvoed.
         private static void Postfix(PBS_TriplanarMetallic __instance)
         {
             var w = Userspace.UserspaceWorld;
-            w.RunInUpdates(0, () =>
+            w.RunInUpdates(5, () =>
             {
                 __instance._regular.IsDrivable = true;
                 __instance._regular.DriveFrom(__instance._regular, true);
@@ -190,21 +210,36 @@ namespace MonkeyLoader.DoublePrecision
         [HarmonyPatch(typeof(PBS_TriplanarSpecular), nameof(PBS_TriplanarSpecular.GetShader))]
         private static bool Prefix(PBS_TriplanarSpecular __instance, ref FrooxEngine.Shader __result)
         {
-            Logger.Info(() => "(PBS_TriplanarSpecular.GetShader)");
+            Uri URL;
+            Logger.Debug(() => "PBS_TriplanarSpecular.GetShader");
             if (__instance.Transparent)
             {
-                __result = __instance.EnsureSharedShader(__instance._transparent, new Uri(Shaders.resdb_choco_transparent_specular)).Asset;
+                URL = new Uri(Shaders.resdb_choco_transparent_specular);
+                __result = __instance.EnsureSharedShader(__instance._transparent, URL).Asset;
+                ((StaticShader)__instance._transparent.Target).URL.DriveFrom(((StaticShader)__instance._transparent.Target).URL, true);
+                if (((StaticShader)__instance._transparent.Target).URL != URL)
+                {
+                    Logger.Warn(() => "EnsureSharedShader returned the wrong url, attempting to manually change after applying local drive w/ writeback");
+                    ((StaticShader)__instance._transparent.Target).URL.ForceSet(URL);
+                }
                 return false;
             }
-            __result = __instance.EnsureSharedShader(__instance._regular, new Uri(Shaders.resdb_choco_specular)).Asset;
+            URL = new Uri(Shaders.resdb_choco_specular);
+            __result = __instance.EnsureSharedShader(__instance._regular, URL).Asset;
+            ((StaticShader)__instance._regular.Target).URL.DriveFrom(((StaticShader)__instance._regular.Target).URL, true);
+            if (((StaticShader)__instance._regular.Target).URL != URL)
+            {
+                Logger.Warn(() => "EnsureSharedShader returned the wrong url, attempting to manually change after applying local drive w/ writeback");
+                ((StaticShader)__instance._regular.Target).URL.ForceSet(URL);
+            }
             return false; //never run original function
         }
 
-        [HarmonyPatch(typeof(PBS_TriplanarSpecular), nameof(PBS_TriplanarSpecular.InitializeSyncMembers))]
+        [HarmonyPatch(typeof(PBS_TriplanarSpecular), nameof(PBS_TriplanarSpecular.InitializeSyncMembers))]//TODO: this entire patch can likely be removed.
         private static void Postfix(PBS_TriplanarSpecular __instance)
         {
             var w = Userspace.UserspaceWorld;
-            w.RunInUpdates(0, () =>
+            w.RunInUpdates(5, () =>
             {
                 __instance._regular.IsDrivable = true;
                 __instance._regular.DriveFrom(__instance._regular, true);
@@ -221,7 +256,7 @@ namespace MonkeyLoader.DoublePrecision
         protected override IEnumerable<IFeaturePatch> GetFeaturePatches() => Enumerable.Empty<IFeaturePatch>();
         private static void Postfix(PBS_TriplanarMaterial __instance)
         {
-            Logger.Info(() => "New Material initialized!");
+            //Logger.Debug(() => "New Material initialized!");
             DataShare.FrooxMaterials.Add(__instance);
         }
 

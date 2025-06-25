@@ -8,15 +8,7 @@ using System.Linq;
 using UnityEngine;
 using UnityFrooxEngineRunner;
 using System;
-using UnityEngine.Assertions;
-using SkyFrost.Base;
-using FrooxEngine.ProtoFlux;
-using System.Security.Policy;
-using Elements.Assets;
-using static OfficialAssets;
-using System.Xml.Linq;
 using static MonkeyLoader.DoublePrecision.Shaders;
-using LiteDB.Engine;
 
 namespace MonkeyLoader.DoublePrecision
 {
@@ -40,15 +32,15 @@ namespace MonkeyLoader.DoublePrecision
     {
         protected override IEnumerable<IFeaturePatch> GetFeaturePatches() => Enumerable.Empty<IFeaturePatch>();
 
-        private static int IsUserspaceInitialized = 1;
+        private static int IsUserspaceInitialized = 0;
+        private static bool ManualMutexErrorCatch = false;
         private static void Postfix(World __instance)
         {
-#if DEBUG
-            //if (!__instance.IsUserspace())
-            //{
-            //    //IsUserspaceInitialized = true;
-            //}
-#endif
+            if (ManualMutexErrorCatch)
+            {
+                Logger.Error(() => "Something went very wrong in the previous world init.");
+            }
+            ManualMutexErrorCatch = true;
             Logger.Info(() => "Intercepted World Init, attempting to cache World reference.");
             if (IsUserspaceInitialized >= 1)
             {
@@ -63,16 +55,16 @@ namespace MonkeyLoader.DoublePrecision
                 {
                     Logger.Error(() => "Unable to cast IWorldConnector to WorldConnector.");
                 }
-                Shaders.InitializeWithWorld(__instance);
-                Logger.Info(() => "Shader world init done");
-                Initialize(ShaderName.PBS_Triplanar);
-                Logger.Info(() => "Shader tri");
-                Initialize(ShaderName.PBS_TriplanarSpecular);
-                Logger.Info(() => "Shader tri spec");
-                Initialize(ShaderName.PBS_TriplanarTransparent);
-                Logger.Info(() => "Shader tri trans");
-                Initialize(ShaderName.PBS_TriplanarTransparentSpecular);
-                Logger.Info(() => "Shader tri trans spec");
+                //Shaders.InitializeWithWorld(__instance);
+                //Logger.Info(() => "Shader world init done");
+                //Initialize(ShaderName.PBS_Triplanar);
+                //Logger.Info(() => "Shader tri");
+                //Initialize(ShaderName.PBS_TriplanarSpecular);
+                //Logger.Info(() => "Shader tri spec");
+                //Initialize(ShaderName.PBS_TriplanarTransparent);
+                //Logger.Info(() => "Shader tri trans");
+                //Initialize(ShaderName.PBS_TriplanarTransparentSpecular);
+                //Logger.Info(() => "Shader tri trans spec");
 
             }
             else
@@ -82,6 +74,7 @@ namespace MonkeyLoader.DoublePrecision
             }
 
             Logger.Info(() => "Done! There are a total of " + DataShare.frooxWorlds.Count + " world connectors in the list.");
+            ManualMutexErrorCatch = false;
         }
     }
 
@@ -113,19 +106,19 @@ namespace MonkeyLoader.DoublePrecision
                 //Logger.Error(() => "There are no valid focused worlds! Fatal error, exiting function.");
                 return;
             }
-            Vector3 xyz = __instance.transform.localScale;
-            Vector3 iscl = new Vector3(1 / xyz.x, 1 / xyz.y, 1 / xyz.z);
+            //Vector3 xyz = __instance.transform.localScale;
+            //Vector3 iscl = new Vector3(1 / xyz.x, 1 / xyz.y, 1 / xyz.z);
             Vector3 playerMotion = __instance.transform.position - DataShare.FrooxCameraPosition[index];
             DataShare.FrooxCameraPosition[index] = __instance.transform.position;
             Vector3 pos = __instance.transform.position;
-            __instance._viewPos -= new float3(pos.x * iscl.x, pos.y, pos.z * iscl.z);
+            __instance._viewPos -= new float3(pos.x, pos.y, pos.z);
             //Do we really need viewScale?
             DataShare.unityWorldRoots[index].transform.position -= playerMotion;
 
-            DataShare.unityWorldRoots[index].transform.localScale = iscl;
-            float3 vpos = __instance._viewPos;
-            float3 fxyzpos = new float3(vpos.x, iscl.y * vpos.y, vpos.z);
-            __instance._viewPos = fxyzpos;
+            //DataShare.unityWorldRoots[index].transform.localScale = iscl;
+            //float3 vpos = __instance._viewPos;
+            //float3 fxyzpos = new float3(vpos.x, iscl.y * vpos.y, vpos.z);
+            //__instance._viewPos = fxyzpos;
             //__instance._viewScl = new float3(10,10,10);
             __instance.transform.position = Vector3.zero;
             Vector3 rootPos = DataShare.unityWorldRoots[index].transform.position;
@@ -176,17 +169,16 @@ namespace MonkeyLoader.DoublePrecision
         }
 
         [HarmonyPatch(typeof(PBS_TriplanarMetallic), nameof(PBS_TriplanarMetallic.InitializeSyncMembers))]
-        private static bool Prefix(PBS_TriplanarMetallic __instance)
+        private static void Postfix(PBS_TriplanarMetallic __instance)
         {
             var w = Userspace.UserspaceWorld;
-            w.RunInUpdates(5, () =>
+            w.RunInUpdates(0, () =>
             {
                 __instance._regular.IsDrivable = true;
                 __instance._regular.DriveFrom(__instance._regular, true);
                 __instance._transparent.IsDrivable = true;
                 __instance._transparent.DriveFrom(__instance._transparent, true);
             });
-            return true;
         }
     }
 
@@ -212,7 +204,7 @@ namespace MonkeyLoader.DoublePrecision
         private static void Postfix(PBS_TriplanarSpecular __instance)
         {
             var w = Userspace.UserspaceWorld;
-            w.RunInUpdates(5, () =>
+            w.RunInUpdates(0, () =>
             {
                 __instance._regular.IsDrivable = true;
                 __instance._regular.DriveFrom(__instance._regular, true);

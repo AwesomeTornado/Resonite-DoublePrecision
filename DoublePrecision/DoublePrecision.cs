@@ -54,16 +54,6 @@ namespace MonkeyLoader.DoublePrecision
                 {
                     Logger.Error(() => "Unable to cast IWorldConnector to WorldConnector.");
                 }
-                //Shaders.InitializeWithWorld(__instance);
-                //Logger.Info(() => "Shader world init done");
-                //Initialize(ShaderName.PBS_Triplanar);
-                //Logger.Info(() => "Shader tri");
-                //Initialize(ShaderName.PBS_TriplanarSpecular);
-                //Logger.Info(() => "Shader tri spec");
-                //Initialize(ShaderName.PBS_TriplanarTransparent);
-                //Logger.Info(() => "Shader tri trans");
-                //Initialize(ShaderName.PBS_TriplanarTransparentSpecular);
-                //Logger.Info(() => "Shader tri trans spec");
 
             }
             else

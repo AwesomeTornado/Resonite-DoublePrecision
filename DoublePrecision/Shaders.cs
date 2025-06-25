@@ -1,9 +1,5 @@
 ﻿using FrooxEngine;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MonkeyLoader.DoublePrecision
 {
@@ -168,28 +164,6 @@ namespace MonkeyLoader.DoublePrecision
             PBS_TriplanarSpecular_staticShader = createShaderComponent(choco_specular, new Uri(resdb_choco_specular), world);
             PBS_TriplanarTransparent_staticShader = createShaderComponent(choco_transparent, new Uri(resdb_choco_transparent), world);
             PBS_TriplanarTransparentSpecular_staticShader = createShaderComponent(choco_transparent_specular, new Uri(resdb_choco_transparent_specular), world);
-
-
-            //metallic1.InitializeSyncMembers();
-            //specular1.InitializeSyncMembers();
-            //metallic2.InitializeSyncMembers();
-            //specular2.InitializeSyncMembers();
-
-            //World world = PBS_Triplanar_staticShader.World;
-            //metallic1.World = world;
-            //metallic2.World = world;
-            //specular1.World = world;
-            //specular2.World = world;
-
-            //metallic1._regular.Target = PBS_Triplanar_staticShader;
-            //specular1._regular.Target = PBS_TriplanarSpecular_staticShader;
-            //metallic2._transparent.Target = PBS_TriplanarTransparent_staticShader;
-            //specular2._transparent.Target = PBS_TriplanarTransparentSpecular_staticShader;
-
-            //PBS_Triplanar_staticShader.InitializeWorker(world);
-            //PBS_TriplanarSpecular_staticShader.InitializeWorker(world);
-            //PBS_TriplanarTransparent_staticShader.InitializeWorker(world);
-            //PBS_TriplanarTransparentSpecular_staticShader.InitializeWorker(world);
             return true;
         }
 

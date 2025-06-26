@@ -119,28 +119,31 @@ namespace MonkeyLoader.DoublePrecision
         protected override IEnumerable<IFeaturePatch> GetFeaturePatches() => Enumerable.Empty<IFeaturePatch>();
 
         [HarmonyPatch(typeof(PBS_TriplanarMetallic), nameof(PBS_TriplanarMetallic.GetShader))]
-        private static void Postfix(PBS_TriplanarMetallic __instance, ref FrooxEngine.Shader __result)
+        private static bool Prefix(PBS_TriplanarMetallic __instance, ref FrooxEngine.Shader __result)
         {
             Uri URL;
             Logger.Debug(() => "PBS_TriplanarMetallic.GetShader");
             if (__instance.Transparent)
             {
                 URL = new Uri(Shaders.resdb_choco_transparent);
+                __result = __instance.EnsureSharedShader(__instance._transparent, URL).Asset;
                 ((StaticShader)__instance._transparent.Target).URL.DriveFrom(((StaticShader)__instance._transparent.Target).URL, true);
                 if (((StaticShader)__instance._transparent.Target).URL != URL)
                 {
                     Logger.Warn(() => "EnsureSharedShader returned the wrong url, attempting to manually change after applying local drive w/ writeback");
                     ((StaticShader)__instance._transparent.Target).URL.ForceSet(URL);
                 }
-                return;
+                return false;
             }
             URL = new Uri(Shaders.resdb_choco);
+            __result = __instance.EnsureSharedShader(__instance._regular, URL).Asset;
             ((StaticShader)__instance._regular.Target).URL.DriveFrom(((StaticShader)__instance._regular.Target).URL, true);
             if (((StaticShader)__instance._regular.Target).URL != URL)
             {
                 Logger.Warn(() => "EnsureSharedShader returned the wrong url, attempting to manually change after applying local drive w/ writeback");
                 ((StaticShader)__instance._regular.Target).URL.ForceSet(URL);
             }
+            return false; //never run original function
         }
     }
 
@@ -150,28 +153,31 @@ namespace MonkeyLoader.DoublePrecision
         protected override IEnumerable<IFeaturePatch> GetFeaturePatches() => Enumerable.Empty<IFeaturePatch>();
 
         [HarmonyPatch(typeof(PBS_TriplanarSpecular), nameof(PBS_TriplanarSpecular.GetShader))]
-        private static void Postfix(PBS_TriplanarSpecular __instance, ref FrooxEngine.Shader __result)
+        private static bool Prefix(PBS_TriplanarSpecular __instance, ref FrooxEngine.Shader __result)
         {
             Uri URL;
             Logger.Debug(() => "PBS_TriplanarSpecular.GetShader");
             if (__instance.Transparent)
             {
                 URL = new Uri(Shaders.resdb_choco_transparent_specular);
+                __result = __instance.EnsureSharedShader(__instance._transparent, URL).Asset;
                 ((StaticShader)__instance._transparent.Target).URL.DriveFrom(((StaticShader)__instance._transparent.Target).URL, true);
                 if (((StaticShader)__instance._transparent.Target).URL != URL)
                 {
                     Logger.Warn(() => "EnsureSharedShader returned the wrong url, attempting to manually change after applying local drive w/ writeback");
                     ((StaticShader)__instance._transparent.Target).URL.ForceSet(URL);
                 }
-                return;
+                return false;
             }
             URL = new Uri(Shaders.resdb_choco_specular);
+            __result = __instance.EnsureSharedShader(__instance._regular, URL).Asset;
             ((StaticShader)__instance._regular.Target).URL.DriveFrom(((StaticShader)__instance._regular.Target).URL, true);
             if (((StaticShader)__instance._regular.Target).URL != URL)
             {
                 Logger.Warn(() => "EnsureSharedShader returned the wrong url, attempting to manually change after applying local drive w/ writeback");
                 ((StaticShader)__instance._regular.Target).URL.ForceSet(URL);
             }
+            return false; //never run original function
         }
     }
 

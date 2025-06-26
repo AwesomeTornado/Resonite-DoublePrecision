@@ -130,7 +130,7 @@ namespace MonkeyLoader.DoublePrecision
                 if (((StaticShader)__instance._transparent.Target).URL != URL)
                 {
                     Logger.Warn(() => "EnsureSharedShader returned the wrong url, attempting to manually change after applying local drive w/ writeback");
-                    ((StaticShader)__instance._transparent.Target).URL.ForceSet(URL);
+                    ((StaticShader)__instance._transparent.Target).URL.Value = URL;
                 }
                 return;
             }
@@ -139,7 +139,7 @@ namespace MonkeyLoader.DoublePrecision
             if (((StaticShader)__instance._regular.Target).URL != URL)
             {
                 Logger.Warn(() => "EnsureSharedShader returned the wrong url, attempting to manually change after applying local drive w/ writeback");
-                ((StaticShader)__instance._regular.Target).URL.ForceSet(URL);
+                ((StaticShader)__instance._regular.Target).URL.Value = URL;
             }
         }
     }
@@ -161,7 +161,7 @@ namespace MonkeyLoader.DoublePrecision
                 if (((StaticShader)__instance._transparent.Target).URL != URL)
                 {
                     Logger.Warn(() => "EnsureSharedShader returned the wrong url, attempting to manually change after applying local drive w/ writeback");
-                    ((StaticShader)__instance._transparent.Target).URL.ForceSet(URL);
+                    ((StaticShader)__instance._transparent.Target).URL.Value = URL;
                 }
                 return;
             }
@@ -170,7 +170,7 @@ namespace MonkeyLoader.DoublePrecision
             if (((StaticShader)__instance._regular.Target).URL != URL)
             {
                 Logger.Warn(() => "EnsureSharedShader returned the wrong url, attempting to manually change after applying local drive w/ writeback");
-                ((StaticShader)__instance._regular.Target).URL.ForceSet(URL);
+                ((StaticShader)__instance._regular.Target).URL.Value = URL;
             }
         }
     }

@@ -8,6 +8,10 @@ using System.Linq;
 using UnityEngine;
 using UnityFrooxEngineRunner;
 using System;
+using System.Security.Policy;
+using System.IO;
+using Elements.Assets;
+using UnityEngine.Networking;
 
 namespace MonkeyLoader.DoublePrecision
 {
@@ -34,6 +38,7 @@ namespace MonkeyLoader.DoublePrecision
                     DataShare.frooxWorlds.RemoveAt(i);
                     DataShare.unityWorldRoots.RemoveAt(i);
                     DataShare.FrooxCameraPosition.RemoveAt(i);
+                    i--;
                 }
                 else if (DataShare.frooxWorlds[i].Focus == World.WorldFocus.Focused)
                 {
@@ -122,26 +127,33 @@ namespace MonkeyLoader.DoublePrecision
         private static bool Prefix(PBS_TriplanarMetallic __instance, ref FrooxEngine.Shader __result)
         {
             Uri URL;
-            Logger.Debug(() => "PBS_TriplanarMetallic.GetShader");
+            Uri officialURL;
+            AssetRef<FrooxEngine.Shader> instance_shader;
             if (__instance.Transparent)
             {
                 URL = new Uri(Shaders.resdb_choco_transparent);
-                __result = __instance.EnsureSharedShader(__instance._transparent, URL).Asset;
-                ((StaticShader)__instance._transparent.Target).URL.DriveFrom(((StaticShader)__instance._transparent.Target).URL, true);
-                if (((StaticShader)__instance._transparent.Target).URL != URL)
-                {
-                    Logger.Warn(() => "EnsureSharedShader returned the wrong url, attempting to manually change after applying local drive w/ writeback");
-                    ((StaticShader)__instance._transparent.Target).URL.Value = URL;
-                }
-                return false;
+                officialURL = new Uri(Shaders.resdb_froox_transparent);
+                instance_shader = __instance._transparent;
             }
-            URL = new Uri(Shaders.resdb_choco);
-            __result = __instance.EnsureSharedShader(__instance._regular, URL).Asset;
-            ((StaticShader)__instance._regular.Target).URL.DriveFrom(((StaticShader)__instance._regular.Target).URL, true);
-            if (((StaticShader)__instance._regular.Target).URL != URL)
+            else
             {
-                Logger.Warn(() => "EnsureSharedShader returned the wrong url, attempting to manually change after applying local drive w/ writeback");
-                ((StaticShader)__instance._regular.Target).URL.Value = URL;
+                URL = new Uri(Shaders.resdb_choco);
+                officialURL = new Uri(Shaders.resdb_froox);
+                instance_shader = __instance._regular;
+            }
+            __result = __instance.EnsureSharedShader(instance_shader, officialURL).Asset;
+            if (((StaticShader)instance_shader.Target).URL.Value != URL)
+            {
+                Logger.Info(() => "Creating local user override");
+                ((StaticShader)instance_shader.Target).URL.Value = URL;
+                World w = __instance.World;
+                Slot localSlot = w.AssetsSlot.FindLocalChildOrAdd("DoublePrecision Local Overrides");
+                localSlot.persistent.ForceSet(false);
+                var Override = ValueUserOverride.OverrideForUser(((StaticShader)instance_shader.Target).URL, w.LocalUser, URL);
+                Override.Default.Value = officialURL;
+                //localSlot.MoveComponent(Override);
+                Override.persistent.ForceSet(false);
+                Logger.Info(() => "Finished creation of local user override");
             }
             return false; //never run original function
         }
@@ -156,26 +168,33 @@ namespace MonkeyLoader.DoublePrecision
         private static bool Prefix(PBS_TriplanarSpecular __instance, ref FrooxEngine.Shader __result)
         {
             Uri URL;
-            Logger.Debug(() => "PBS_TriplanarSpecular.GetShader");
+            Uri officialURL;
+            AssetRef<FrooxEngine.Shader> instance_shader;
             if (__instance.Transparent)
             {
                 URL = new Uri(Shaders.resdb_choco_transparent_specular);
-                __result = __instance.EnsureSharedShader(__instance._transparent, URL).Asset;
-                ((StaticShader)__instance._transparent.Target).URL.DriveFrom(((StaticShader)__instance._transparent.Target).URL, true);
-                if (((StaticShader)__instance._transparent.Target).URL != URL)
-                {
-                    Logger.Warn(() => "EnsureSharedShader returned the wrong url, attempting to manually change after applying local drive w/ writeback");
-                    ((StaticShader)__instance._transparent.Target).URL.Value = URL;
-                }
-                return false;
+                officialURL = new Uri(Shaders.resdb_froox_transparent_specular);
+                instance_shader = __instance._transparent;
             }
-            URL = new Uri(Shaders.resdb_choco_specular);
-            __result = __instance.EnsureSharedShader(__instance._regular, URL).Asset;
-            ((StaticShader)__instance._regular.Target).URL.DriveFrom(((StaticShader)__instance._regular.Target).URL, true);
-            if (((StaticShader)__instance._regular.Target).URL != URL)
+            else
             {
-                Logger.Warn(() => "EnsureSharedShader returned the wrong url, attempting to manually change after applying local drive w/ writeback");
-                ((StaticShader)__instance._regular.Target).URL.Value = URL;
+                URL = new Uri(Shaders.resdb_choco_specular);
+                officialURL = new Uri(Shaders.resdb_froox_specular);
+                instance_shader = __instance._regular;
+            }
+            __result = __instance.EnsureSharedShader(instance_shader, officialURL).Asset;
+            if (((StaticShader)instance_shader.Target).URL.Value != URL)
+            {
+                Logger.Info(() => "Creating local user override");
+                ((StaticShader)instance_shader.Target).URL.Value = URL;
+                World w = __instance.World;
+                Slot localSlot = w.AssetsSlot.FindLocalChildOrAdd("DoublePrecision Local Overrides");
+                localSlot.persistent.ForceSet(false);
+                var Override = ValueUserOverride.OverrideForUser(((StaticShader)instance_shader.Target).URL, w.LocalUser, URL);
+                Override.Default.Value = officialURL;
+                //localSlot.MoveComponent(Override);
+                Override.persistent.ForceSet(false);
+                Logger.Info(() => "Finished creation of local user override");
             }
             return false; //never run original function
         }
@@ -203,6 +222,17 @@ namespace MonkeyLoader.DoublePrecision
         private static void Postfix(PBS_TriplanarMaterial __instance)
         {
             DataShare.FrooxMaterials.Add(__instance);
+        }
+    }
+
+    [HarmonyPatchCategory(nameof(fuch_off_of_it))]
+    [HarmonyPatch(typeof(UnityEngine.Networking.DownloadHandlerAssetBundle), "InternalCreateAssetBundleCached")]
+    internal class fuch_off_of_it : ResoniteMonkey<fuch_off_of_it>
+    {
+        protected override IEnumerable<IFeaturePatch> GetFeaturePatches() => Enumerable.Empty<IFeaturePatch>();
+        private static void Prefix(string url, string name, Hash128 hash, uint crc)
+        {
+            Logger.Info(() => "downloading asset " + url);
         }
     }
 }

@@ -8,16 +8,12 @@ using System.Linq;
 using UnityEngine;
 using UnityFrooxEngineRunner;
 using System;
-using System.Security.Policy;
-using System.IO;
-using Elements.Assets;
-using UnityEngine.Networking;
 
 namespace MonkeyLoader.DoublePrecision
 {
     public class AssemblyInfo
     {
-        internal const string VERSION_CONSTANT = "1.6.0"; //Changing the version here updates it in all locations needed
+        internal const string VERSION_CONSTANT = "1.6.1"; //Changing the version here updates it in all locations needed
     }
 
     public class DataShare
@@ -26,7 +22,6 @@ namespace MonkeyLoader.DoublePrecision
         public static List<GameObject> unityWorldRoots = new List<GameObject>();
         public static List<Vector3> FrooxCameraPosition = new List<Vector3>();
         public static List<PBS_TriplanarMaterial> FrooxMaterials = new List<PBS_TriplanarMaterial>();
-        public static List<MaterialProperty?> MaterialIndexes = new List<MaterialProperty?>();
 
         public static int FocusedWorld()
         {
@@ -75,10 +70,7 @@ namespace MonkeyLoader.DoublePrecision
                 DataShare.unityWorldRoots.Add(worldConnector.WorldRoot);
                 DataShare.FrooxCameraPosition.Add(Vector3.zero);
             }
-            else
-            {
-                Logger.Error(() => "Unable to cast IWorldConnector to WorldConnector.");
-            }
+            else { Logger.Error(() => "Unable to cast IWorldConnector to WorldConnector."); }
 
             Logger.Info(() => "Done! There are a total of " + DataShare.frooxWorlds.Count + " world connectors in the list.");
         }
@@ -144,16 +136,10 @@ namespace MonkeyLoader.DoublePrecision
             __result = __instance.EnsureSharedShader(instance_shader, officialURL).Asset;
             if (((StaticShader)instance_shader.Target).URL.Value != URL)
             {
-                Logger.Info(() => "Creating local user override");
-                ((StaticShader)instance_shader.Target).URL.Value = URL;
                 World w = __instance.World;
-                Slot localSlot = w.AssetsSlot.FindLocalChildOrAdd("DoublePrecision Local Overrides");
-                localSlot.persistent.ForceSet(false);
                 var Override = ValueUserOverride.OverrideForUser(((StaticShader)instance_shader.Target).URL, w.LocalUser, URL);
                 Override.Default.Value = officialURL;
-                //localSlot.MoveComponent(Override);
-                Override.persistent.ForceSet(false);
-                Logger.Info(() => "Finished creation of local user override");
+                Override.Persistent = false;
             }
             return false; //never run original function
         }
@@ -185,16 +171,10 @@ namespace MonkeyLoader.DoublePrecision
             __result = __instance.EnsureSharedShader(instance_shader, officialURL).Asset;
             if (((StaticShader)instance_shader.Target).URL.Value != URL)
             {
-                Logger.Info(() => "Creating local user override");
-                ((StaticShader)instance_shader.Target).URL.Value = URL;
                 World w = __instance.World;
-                Slot localSlot = w.AssetsSlot.FindLocalChildOrAdd("DoublePrecision Local Overrides");
-                localSlot.persistent.ForceSet(false);
                 var Override = ValueUserOverride.OverrideForUser(((StaticShader)instance_shader.Target).URL, w.LocalUser, URL);
                 Override.Default.Value = officialURL;
-                //localSlot.MoveComponent(Override);
-                Override.persistent.ForceSet(false);
-                Logger.Info(() => "Finished creation of local user override");
+                Override.Persistent = false;
             }
             return false; //never run original function
         }
@@ -222,17 +202,6 @@ namespace MonkeyLoader.DoublePrecision
         private static void Postfix(PBS_TriplanarMaterial __instance)
         {
             DataShare.FrooxMaterials.Add(__instance);
-        }
-    }
-
-    [HarmonyPatchCategory(nameof(fuch_off_of_it))]
-    [HarmonyPatch(typeof(UnityEngine.Networking.DownloadHandlerAssetBundle), "InternalCreateAssetBundleCached")]
-    internal class fuch_off_of_it : ResoniteMonkey<fuch_off_of_it>
-    {
-        protected override IEnumerable<IFeaturePatch> GetFeaturePatches() => Enumerable.Empty<IFeaturePatch>();
-        private static void Prefix(string url, string name, Hash128 hash, uint crc)
-        {
-            Logger.Info(() => "downloading asset " + url);
         }
     }
 }
